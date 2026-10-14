@@ -5,6 +5,7 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/uangku/',
   plugins: [
     vue(),
     VitePWA({
@@ -18,6 +19,8 @@ export default defineConfig({
         background_color: '#FAF7F2',
         display: 'standalone',
         orientation: 'portrait',
+        start_url: '/uangku/',
+        scope: '/uangku/',
         icons: [
           {
             src: 'pwa-192x192.png',
