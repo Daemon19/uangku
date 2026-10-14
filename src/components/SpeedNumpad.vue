@@ -207,21 +207,21 @@ async function handleCategoryTap(categoryName: string) {
       <button
         type="button"
         @click="handleDigit('1')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         1
       </button>
       <button
         type="button"
         @click="handleDigit('2')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         2
       </button>
       <button
         type="button"
         @click="handleDigit('3')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         3
       </button>
@@ -229,30 +229,30 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @click="handleBackspace"
         title="Hapus Digit Terakhir"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-sm btn-tactile"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-sm btn-tactile"
       >
-        <Delete :size="20" />
+        <Delete :size="22" />
       </button>
 
       <!-- Row 2 -->
       <button
         type="button"
         @click="handleDigit('4')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         4
       </button>
       <button
         type="button"
         @click="handleDigit('5')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         5
       </button>
       <button
         type="button"
         @click="handleDigit('6')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         6
       </button>
@@ -260,30 +260,30 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @click="handleClear"
         title="Reset Nominal"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-sm btn-tactile"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-sm btn-tactile"
       >
-        <RotateCcw :size="18" />
+        <RotateCcw :size="20" />
       </button>
 
       <!-- Row 3 -->
       <button
         type="button"
         @click="handleDigit('7')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         7
       </button>
       <button
         type="button"
         @click="handleDigit('8')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         8
       </button>
       <button
         type="button"
         @click="handleDigit('9')"
-        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+        class="h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         9
       </button>
@@ -291,7 +291,7 @@ async function handleCategoryTap(categoryName: string) {
       <button
         type="button"
         @click="handleAddThousands"
-        class="row-span-2 rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold text-sm sm:text-base border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-sm btn-tactile"
+        class="row-span-2 h-full min-h-[140px] rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold text-sm sm:text-base border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-sm btn-tactile"
         title="Tambah Ribuan (+000)"
       >
         +000
@@ -302,7 +302,7 @@ async function handleCategoryTap(categoryName: string) {
         <button
           type="button"
           @click="handleDigit('0')"
-          class="w-full h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
+          class="w-full h-[66px] sm:h-[72px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
         >
           0
         </button>
