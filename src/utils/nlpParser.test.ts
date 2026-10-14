@@ -67,4 +67,12 @@ describe('Bahasa Indonesia NLP Expense Parser', () => {
     expect(result.type).toBe(null);
     expect(result.note.toLowerCase()).toContain('liar');
   });
+
+  it('parses "Nasi padang keputih 25k" with category Makanan and note', () => {
+    const result = parseSmartExpense('Nasi padang keputih 25k');
+    expect(result.amount).toBe(25000);
+    expect(result.category).toBe('Makanan');
+    expect(result.note.toLowerCase()).toContain('nasi padang keputih');
+  });
 });
+

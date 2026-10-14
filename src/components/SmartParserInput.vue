@@ -103,15 +103,15 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div class="bg-sand-card border-t border-sand-border/80 shadow-[0_-8px_25px_rgba(45,74,62,0.08)] p-3.5 space-y-3">
+  <div class="bg-sand-card flex-1 flex flex-col justify-start p-4 space-y-4 overflow-y-auto">
     <!-- Freeform NLP Input Field -->
     <div class="relative">
       <textarea
         v-model="inputText"
         @keydown.enter.prevent="handleSubmit"
-        rows="2"
-        placeholder="Ketik bebas: '25rb makan siang cash warung bu tetty' atau '1,5jt tagihan bca'..."
-        class="w-full p-3 pr-10 text-xs sm:text-sm bg-sand-surface border border-sand-border rounded-2xl text-stone-dark placeholder:text-stone-muted focus:outline-none focus:border-matcha-deep focus:ring-1 focus:ring-matcha-deep resize-none shadow-inner"
+        rows="3"
+        placeholder="Nasi padang keputih 25k"
+        class="w-full p-4 pr-12 text-sm sm:text-base bg-sand-surface border border-sand-border rounded-2xl text-stone-dark placeholder:text-stone-muted focus:outline-none focus:border-matcha-deep focus:ring-1 focus:ring-matcha-deep resize-none shadow-inner"
       ></textarea>
 
       <button
@@ -119,30 +119,30 @@ function handleSubmit() {
         @click="handleSubmit"
         :disabled="parsed.amount <= 0"
         title="Catat Sekarang (Enter)"
-        class="absolute right-2.5 bottom-3.5 p-2 rounded-xl bg-matcha-deep text-white disabled:opacity-40 disabled:pointer-events-none hover:bg-matcha-dark transition-all shadow-sm btn-tactile"
+        class="absolute right-3 bottom-3.5 p-2.5 rounded-xl bg-matcha-deep text-white disabled:opacity-40 disabled:pointer-events-none hover:bg-matcha-dark transition-all shadow-sm btn-tactile"
       >
-        <CornerDownLeft :size="16" />
+        <CornerDownLeft :size="18" />
       </button>
     </div>
 
     <!-- Real-time Live Parsed Preview Card -->
     <div
       v-if="inputText.trim().length > 0"
-      class="bg-sand-surface rounded-2xl p-3 border border-matcha-200/80 shadow-sm transition-all animate-fadeIn"
+      class="bg-sand-surface rounded-2xl p-4 border border-matcha-200/80 shadow-sm transition-all animate-fadeIn"
     >
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-matcha-deep flex items-center gap-1">
-          <Sparkles :size="12" class="text-amber-warm" />
+      <div class="flex items-center justify-between mb-2.5">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-matcha-deep flex items-center gap-1.5">
+          <Sparkles :size="13" class="text-amber-warm" />
           Hasil Deteksi Otomatis:
         </span>
-        <span class="text-[10px] text-stone-muted">Tekan Enter untuk Catat</span>
+        <span class="text-[11px] text-stone-muted">Tekan Enter untuk Catat</span>
       </div>
 
       <!-- Detection Chips -->
-      <div class="flex items-center gap-1.5 flex-wrap">
+      <div class="flex items-center gap-2 flex-wrap">
         <!-- Nominal Badge -->
         <span
-          class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-xl"
+          class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-xl"
           :class="parsed.amount > 0 ? 'bg-matcha-deep text-white shadow-sm' : 'bg-sand-border text-stone-warm'"
         >
           {{ parsed.amount > 0 ? formatRupiah(parsed.amount) : 'Belum ada nominal' }}
@@ -151,10 +151,10 @@ function handleSubmit() {
         <!-- Category Badge (interactive) -->
         <button
           type="button"
-          class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-xl bg-matcha-100 text-matcha-deep border border-matcha-200 hover:bg-matcha-200 transition-colors btn-tactile"
-          title="Klik untuk ganti kategori"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-xl bg-matcha-100 text-matcha-deep border border-matcha-200 hover:bg-matcha-200 transition-colors btn-tactile"
+          title="Kategori terdeteksi"
         >
-          <CategoryIcon :category="activeCategory" :size="13" />
+          <CategoryIcon :category="activeCategory" :size="14" />
           <span>{{ activeCategory }}</span>
         </button>
 
@@ -162,14 +162,14 @@ function handleSubmit() {
         <button
           type="button"
           @click="togglePayment"
-          class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-xl border transition-colors btn-tactile"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-xl border transition-colors btn-tactile"
           :class="activePayment === 'tunai'
             ? 'bg-amber-subtle text-amber-warm border-amber-light'
             : 'bg-blue-50 text-blue-700 border-blue-200'"
           title="Klik untuk ubah metode pembayaran"
         >
-          <Wallet v-if="activePayment === 'tunai'" :size="12" />
-          <CreditCard v-else :size="12" />
+          <Wallet v-if="activePayment === 'tunai'" :size="13" />
+          <CreditCard v-else :size="13" />
           <span>{{ activePayment === 'tunai' ? 'Tunai' : 'Rekening' }}</span>
         </button>
       </div>

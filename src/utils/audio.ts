@@ -124,8 +124,10 @@ export function playSuccess(): void {
 }
 
 /**
- * Delete / Remove sound effect
- * Descending soft pop
+ * Distinguishable Delete / Remove sound effect
+ * Two-stage descending acoustic cue:
+ * 1. Crisp initial warning tap (520Hz -> 420Hz, 50ms)
+ * 2. Deep falling discard swoop (340Hz -> 75Hz over 180ms)
  */
 export function playDelete(): void {
   if (!soundEnabled) return;
@@ -133,23 +135,44 @@ export function playDelete(): void {
   if (!ctx) return;
 
   try {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = 'sine';
     const now = ctx.currentTime;
 
-    osc.frequency.setValueAtTime(380, now);
-    osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+    // Stage 1: Crisp high-mid tap
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
 
-    gain.gain.setValueAtTime(0.14, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(520, now);
+    osc1.frequency.exponentialRampToValueAtTime(420, now + 0.05);
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain1.gain.setValueAtTime(0.16, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
-    osc.start(now);
-    osc.stop(now + 0.08);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+
+    osc1.start(now);
+    osc1.stop(now + 0.05);
+
+    // Stage 2: Deep falling discard swoop
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+
+    osc2.type = 'sine';
+    const swoopStart = now + 0.045;
+    const swoopDuration = 0.18;
+
+    osc2.frequency.setValueAtTime(340, swoopStart);
+    osc2.frequency.exponentialRampToValueAtTime(75, swoopStart + swoopDuration);
+
+    gain2.gain.setValueAtTime(0.18, swoopStart);
+    gain2.gain.exponentialRampToValueAtTime(0.001, swoopStart + swoopDuration);
+
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+
+    osc2.start(swoopStart);
+    osc2.stop(swoopStart + swoopDuration);
   } catch (err) {
     console.debug('Audio delete error:', err);
   }

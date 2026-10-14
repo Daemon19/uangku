@@ -12,6 +12,7 @@ import { formatRupiah } from '@/utils/currency';
 import HeaderSummary from '@/components/HeaderSummary.vue';
 import ActivityStream from '@/components/ActivityStream.vue';
 import ControlCenter from '@/components/ControlCenter.vue';
+import BottomNavbar from '@/components/BottomNavbar.vue';
 import AnalyticsModal from '@/components/AnalyticsModal.vue';
 import ExportModal from '@/components/ExportModal.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
@@ -21,6 +22,17 @@ const { triggerSuccess, triggerDelete } = useAudioFeedback();
 
 // Filter State: defaults to 'today'
 const currentFilter = ref<TimeFilter>('today');
+
+// Input Pane slide-up state: opened by default upon app launch
+const isInputPaneOpen = ref(true);
+
+const mainScrollContainer = ref<HTMLElement | null>(null);
+
+function scrollToTop() {
+  if (mainScrollContainer.value) {
+    mainScrollContainer.value.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 
 // Live Query for all transactions from Dexie (reactive, updates instantly!)
 const allTransactions = useLiveQuery(
@@ -161,7 +173,7 @@ onMounted(async () => {
       />
 
       <!-- Main Activity Feed Stream -->
-      <main class="flex-1 overflow-y-auto">
+      <main ref="mainScrollContainer" class="flex-1 overflow-y-auto">
         <ActivityStream
           :transactions="displayedTransactions"
           @duplicate="handleDuplicate"
@@ -169,8 +181,17 @@ onMounted(async () => {
         />
       </main>
 
-      <!-- Bottom Control Center (Speed Numpad & Smart NLP) -->
+      <!-- Bottom Navigation Bar with (+) in Center -->
+      <BottomNavbar
+        @open-input="isInputPaneOpen = true"
+        @open-analytics="isAnalyticsOpen = true"
+        @scroll-top="scrollToTop"
+      />
+
+      <!-- Full-View Slide-Up Input Pane (Speed Numpad & Smart NLP) -->
       <ControlCenter
+        :is-open="isInputPaneOpen"
+        @close="isInputPaneOpen = false"
         @log-expense="handleLogExpense"
         @toast="showToast"
       />

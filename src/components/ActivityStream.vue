@@ -54,7 +54,7 @@ const groupedTransactions = computed(() => {
 </script>
 
 <template>
-  <section class="px-4 py-3 pb-32">
+  <section class="px-4 py-3 pb-24">
     <!-- Search Bar if transactions exist -->
     <div v-if="transactions.length > 3" class="relative mb-3">
       <Search :size="16" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-muted" />

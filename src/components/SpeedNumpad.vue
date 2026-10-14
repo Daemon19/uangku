@@ -114,17 +114,17 @@ async function handleCategoryTap(categoryName: string) {
 </script>
 
 <template>
-  <div class="bg-sand-card border-t border-sand-border/80 shadow-[0_-8px_25px_rgba(45,74,62,0.08)] px-3 pt-3 pb-4">
+  <div class="bg-sand-card flex-1 flex flex-col justify-between px-3.5 pt-2 pb-5 overflow-y-auto">
     <!-- Amount Display & Note Row -->
     <div
-      class="bg-sand-surface rounded-2xl p-3 border border-sand-border transition-all mb-2.5 flex flex-col gap-1.5"
+      class="bg-sand-surface rounded-2xl p-3 sm:p-4 border border-sand-border transition-all mb-2 flex flex-col gap-1.5 shadow-sm"
       :class="{ 'animate-shake border-red-400 bg-red-50/50': isShaking }"
     >
       <div class="flex items-center justify-between">
         <!-- Currency & Amount Display -->
-        <div class="flex items-baseline gap-1">
-          <span class="text-xs font-bold text-matcha-500 uppercase tracking-wider">IDR</span>
-          <span class="text-2xl sm:text-3xl font-extrabold tracking-tight font-sans text-matcha-deep">
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-xs sm:text-sm font-bold text-matcha-500 uppercase tracking-wider">IDR</span>
+          <span class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight font-sans text-matcha-deep">
             {{ displayAmount }}
           </span>
         </div>
@@ -135,13 +135,13 @@ async function handleCategoryTap(categoryName: string) {
             type="button"
             @click="setPayment('tunai')"
             :class="[
-              'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all btn-tactile',
+              'flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all btn-tactile',
               selectedPayment === 'tunai'
                 ? 'bg-amber-warm text-white shadow-sm'
                 : 'text-stone-warm hover:text-stone-dark'
             ]"
           >
-            <Wallet :size="12" />
+            <Wallet :size="13" />
             <span>Tunai</span>
           </button>
 
@@ -149,13 +149,13 @@ async function handleCategoryTap(categoryName: string) {
             type="button"
             @click="setPayment('rekening')"
             :class="[
-              'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all btn-tactile',
+              'flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all btn-tactile',
               selectedPayment === 'rekening'
                 ? 'bg-matcha-deep text-white shadow-sm'
                 : 'text-stone-warm hover:text-stone-dark'
             ]"
           >
-            <CreditCard :size="12" />
+            <CreditCard :size="13" />
             <span>Rekening</span>
           </button>
         </div>
@@ -165,35 +165,35 @@ async function handleCategoryTap(categoryName: string) {
       <input
         v-model="noteText"
         type="text"
-        placeholder="Catatan singkat (opsional, misal: Es Kopi Susu)..."
-        class="w-full text-xs bg-transparent border-0 border-t border-sand-border/60 pt-1.5 text-stone-dark placeholder:text-stone-muted focus:outline-none focus:ring-0"
+        placeholder="Nasi padang Keputih"
+        class="w-full text-xs sm:text-sm bg-transparent border-0 border-t border-sand-border/60 pt-2 pb-1 text-stone-dark placeholder:text-stone-muted focus:outline-none focus:ring-0"
       />
     </div>
 
     <!-- Category Direct-Log Matrix (Sub-3-Second Trigger) -->
-    <div class="mb-2.5">
+    <div class="mb-2">
       <div class="flex items-center justify-between mb-1.5 px-1">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-warm flex items-center gap-1">
-          Sentuh Kategori untuk Catat Langsung:
+        <span class="text-[11px] font-bold uppercase tracking-wider text-stone-muted/70 flex items-center gap-1">
+          Kategori
         </span>
       </div>
 
-      <div class="grid grid-cols-3 gap-1.5">
+      <div class="grid grid-cols-3 gap-2">
         <button
           v-for="cat in CATEGORIES"
           :key="cat.id"
           type="button"
           @click="handleCategoryTap(cat.name)"
-          class="flex items-center gap-2 p-2 rounded-xl bg-sand-surface hover:bg-matcha-50 border border-sand-border/70 hover:border-matcha-300 text-stone-dark transition-all text-left group btn-tactile active:scale-95"
+          class="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-sand-surface hover:bg-matcha-50 border border-sand-border/70 hover:border-matcha-300 text-stone-dark transition-all text-left group btn-tactile active:scale-95 shadow-xs"
         >
           <div
-            class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-black/5"
+            class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 border border-black/5"
             :style="{ backgroundColor: cat.bgLight, color: cat.color }"
           >
-            <CategoryIcon :category="cat.name" :size="14" />
+            <CategoryIcon :category="cat.name" :size="16" />
           </div>
           <div class="min-w-0">
-            <div class="text-[11px] font-bold truncate leading-tight group-hover:text-matcha-deep">
+            <div class="text-xs font-bold truncate leading-tight group-hover:text-matcha-deep">
               {{ cat.name }}
             </div>
           </div>
@@ -201,27 +201,27 @@ async function handleCategoryTap(categoryName: string) {
       </div>
     </div>
 
-    <!-- Speed Numeric Keypad -->
-    <div class="grid grid-cols-4 gap-1.5">
+    <!-- Speed Numeric Keypad (Enlarged Vertically & Clean Layout) -->
+    <div class="grid grid-cols-4 gap-2">
       <!-- Row 1 -->
       <button
         type="button"
         @click="handleDigit('1')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         1
       </button>
       <button
         type="button"
         @click="handleDigit('2')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         2
       </button>
       <button
         type="button"
         @click="handleDigit('3')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         3
       </button>
@@ -229,30 +229,30 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @click="handleBackspace"
         title="Hapus Digit Terakhir"
-        class="h-10 rounded-xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-sm btn-tactile"
       >
-        <Delete :size="18" />
+        <Delete :size="20" />
       </button>
 
       <!-- Row 2 -->
       <button
         type="button"
         @click="handleDigit('4')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         4
       </button>
       <button
         type="button"
         @click="handleDigit('5')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         5
       </button>
       <button
         type="button"
         @click="handleDigit('6')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         6
       </button>
@@ -260,37 +260,38 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @click="handleClear"
         title="Reset Nominal"
-        class="h-10 rounded-xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-sm btn-tactile"
       >
-        <RotateCcw :size="16" />
+        <RotateCcw :size="18" />
       </button>
 
       <!-- Row 3 -->
       <button
         type="button"
         @click="handleDigit('7')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         7
       </button>
       <button
         type="button"
         @click="handleDigit('8')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         8
       </button>
       <button
         type="button"
         @click="handleDigit('9')"
-        class="h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+        class="h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
       >
         9
       </button>
+      <!-- Single +000 spanning Row 3 & 4 (No Duplicates!) -->
       <button
         type="button"
         @click="handleAddThousands"
-        class="h-10 rounded-xl bg-amber-subtle text-amber-warm font-extrabold text-xs border border-amber-light hover:bg-amber-light/60 flex items-center justify-center shadow-sm btn-tactile"
+        class="row-span-2 rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold text-sm sm:text-base border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-sm btn-tactile"
         title="Tambah Ribuan (+000)"
       >
         +000
@@ -301,19 +302,11 @@ async function handleCategoryTap(categoryName: string) {
         <button
           type="button"
           @click="handleDigit('0')"
-          class="w-full h-10 rounded-xl bg-sand-card text-stone-dark font-extrabold text-base border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile"
+          class="w-full h-13 sm:h-15 rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-sm btn-tactile flex items-center justify-center"
         >
           0
         </button>
       </div>
-      <button
-        type="button"
-        @click="handleAddThousands"
-        class="h-10 rounded-xl bg-matcha-100 text-matcha-deep font-extrabold text-xs border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-sm btn-tactile"
-        title="Tambah Ribuan (+000)"
-      >
-        +000
-      </button>
     </div>
   </div>
 </template>

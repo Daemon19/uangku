@@ -171,8 +171,8 @@ export function parseSmartExpense(input: string): ParsedExpense {
   let category = 'Lainnya';
   let detectedCategoryKeyword: string | undefined;
 
-  // Keywords that often serve as merchant/place descriptors (e.g. "warung bu tetty", "resto padang")
-  const MERCHANT_PREFIXES = ['warung', 'resto', 'toko', 'kafe', 'cafe', 'mall', 'bengkel'];
+  // Keywords that often serve as merchant/item descriptors (e.g. "warung bu tetty", "resto padang", "nasi padang")
+  const MERCHANT_PREFIXES = ['warung', 'resto', 'toko', 'kafe', 'cafe', 'mall', 'bengkel', 'nasi', 'padang', 'mie', 'kopi'];
 
   if (categoryResult) {
     category = categoryResult.category;

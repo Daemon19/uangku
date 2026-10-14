@@ -6,7 +6,7 @@ export const CATEGORIES: CategoryItem[] = [
     name: 'Makanan',
     icon: 'Utensils',
     emoji: '🍱',
-    keywords: ['makanan', 'makan', 'minum', 'kopi', 'resto', 'warung', 'gofood', 'grabfood', 'sarapan', 'siang', 'malam', 'camilan', 'snack'],
+    keywords: ['makanan', 'makan', 'minum', 'kopi', 'resto', 'warung', 'gofood', 'grabfood', 'sarapan', 'siang', 'malam', 'camilan', 'snack', 'nasi', 'padang'],
     defaultType: 'tunai',
     color: '#D97706',
     bgLight: '#FEF3C7',
