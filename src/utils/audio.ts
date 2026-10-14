@@ -51,9 +51,52 @@ export function toggleSound(): boolean {
   return soundEnabled;
 }
 
+let keypressBuffer: AudioBuffer | null = null;
+let activeBufferSource: AudioBufferSourceNode | null = null;
+
+/**
+ * Pre-synthesized tactile keypress AudioBuffer (16ms)
+ * Combines a crisp 1,900Hz snap (phone speaker sweet spot) with a warm 600Hz body.
+ * Generated purely in-memory via deterministic PCM calculations.
+ */
+function getKeypressBuffer(ctx: AudioContext): AudioBuffer {
+  if (keypressBuffer && keypressBuffer.sampleRate === ctx.sampleRate) {
+    return keypressBuffer;
+  }
+
+  const sampleRate = ctx.sampleRate;
+  const duration = 0.016; // 16 milliseconds
+  const numSamples = Math.floor(sampleRate * duration);
+  const buffer = ctx.createBuffer(1, numSamples, sampleRate);
+  const channel = buffer.getChannelData(0);
+
+  const attackSamples = Math.floor(sampleRate * 0.0012); // 1.2ms micro-attack
+  const peakAmp = 0.20; // Calibrated peak gain (gentle on laptops, clear on phones)
+
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+
+    // Linear attack (0 to peakAmp) over 1.2ms, followed by exponential decay
+    let env: number;
+    if (i < attackSamples) {
+      env = (i / attackSamples) * peakAmp;
+    } else {
+      env = peakAmp * Math.exp(-(t - 0.0012) / 0.0035);
+    }
+
+    // Dual-tone presence: 70% 1,900Hz (phone resonance sweet-spot) + 30% 600Hz (warm laptop body)
+    const wave = 0.70 * Math.sin(2 * Math.PI * 1900 * t) + 0.30 * Math.sin(2 * Math.PI * 600 * t);
+    channel[i] = env * wave;
+  }
+
+  keypressBuffer = buffer;
+  return buffer;
+}
+
 /**
  * Keypress click sound for numpad & buttons
- * Crisp, subtle sine click (750Hz -> 300Hz in 25ms)
+ * 100% sample-identical playback using pre-synthesized PCM AudioBuffer.
+ * Zero pitch variation, zero phase jitter, and equalized volume across devices.
  */
 export function playKeypress(): void {
   if (!soundEnabled) return;
@@ -61,23 +104,31 @@ export function playKeypress(): void {
   if (!ctx) return;
 
   try {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = 'sine';
     const now = ctx.currentTime;
 
-    osc.frequency.setValueAtTime(750, now);
-    osc.frequency.exponentialRampToValueAtTime(300, now + 0.025);
+    // Stop previous buffer source immediately to eliminate rapid-tap phase interference
+    if (activeBufferSource) {
+      try {
+        activeBufferSource.stop(now);
+        activeBufferSource.disconnect();
+      } catch {
+        // Ignore if already stopped
+      }
+    }
 
-    gain.gain.setValueAtTime(0.12, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+    const buffer = getKeypressBuffer(ctx);
+    const source = ctx.createBufferSource();
+    activeBufferSource = source;
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.start(now);
 
-    osc.start(now);
-    osc.stop(now + 0.025);
+    source.onended = () => {
+      if (activeBufferSource === source) {
+        activeBufferSource = null;
+      }
+    };
   } catch (err) {
     console.debug('Audio keypress error:', err);
   }
@@ -85,7 +136,7 @@ export function playKeypress(): void {
 
 /**
  * Success chime for logging transactions
- * Arpeggiated C-major triad (C5 -> E5 -> G5) with gentle decay
+ * Arpeggiated C-major triad (C5 -> E5 -> G5) with fuller volume and gentle decay
  */
 export function playSuccess(): void {
   if (!soundEnabled) return;
@@ -100,6 +151,7 @@ export function playSuccess(): void {
     ];
 
     const startTime = ctx.currentTime;
+    const duration = 0.32;
 
     notes.forEach(({ freq, time }) => {
       const noteTime = startTime + time;
@@ -109,14 +161,14 @@ export function playSuccess(): void {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, noteTime);
 
-      gain.gain.setValueAtTime(0.15, noteTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.28);
+      gain.gain.setValueAtTime(0.35, noteTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, noteTime + duration);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(noteTime);
-      osc.stop(noteTime + 0.28);
+      osc.stop(noteTime + duration);
     });
   } catch (err) {
     console.debug('Audio success error:', err);
@@ -127,7 +179,7 @@ export function playSuccess(): void {
  * Distinguishable Delete / Remove sound effect
  * Two-stage descending acoustic cue:
  * 1. Crisp initial warning tap (520Hz -> 420Hz, 50ms)
- * 2. Deep falling discard swoop (340Hz -> 75Hz over 180ms)
+ * 2. Deep falling discard swoop (360Hz -> 80Hz over 180ms)
  */
 export function playDelete(): void {
   if (!soundEnabled) return;
@@ -145,7 +197,7 @@ export function playDelete(): void {
     osc1.frequency.setValueAtTime(520, now);
     osc1.frequency.exponentialRampToValueAtTime(420, now + 0.05);
 
-    gain1.gain.setValueAtTime(0.16, now);
+    gain1.gain.setValueAtTime(0.38, now);
     gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
     osc1.connect(gain1);
@@ -154,18 +206,18 @@ export function playDelete(): void {
     osc1.start(now);
     osc1.stop(now + 0.05);
 
-    // Stage 2: Deep falling discard swoop
+    // Stage 2: Deep falling discard swoop with audible harmonics
     const osc2 = ctx.createOscillator();
     const gain2 = ctx.createGain();
 
-    osc2.type = 'sine';
+    osc2.type = 'triangle';
     const swoopStart = now + 0.045;
     const swoopDuration = 0.18;
 
-    osc2.frequency.setValueAtTime(340, swoopStart);
-    osc2.frequency.exponentialRampToValueAtTime(75, swoopStart + swoopDuration);
+    osc2.frequency.setValueAtTime(360, swoopStart);
+    osc2.frequency.exponentialRampToValueAtTime(80, swoopStart + swoopDuration);
 
-    gain2.gain.setValueAtTime(0.18, swoopStart);
+    gain2.gain.setValueAtTime(0.40, swoopStart);
     gain2.gain.exponentialRampToValueAtTime(0.001, swoopStart + swoopDuration);
 
     osc2.connect(gain2);
