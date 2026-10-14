@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="128" fill="#2D4A3E"/>
+  <!-- Leaf accent -->
+  <path d="M256 96C167.634 96 96 167.634 96 256C96 344.366 167.634 416 256 416C344.366 416 416 344.366 416 256C416 167.634 344.366 96 256 96Z" fill="#3D6554" fill-opacity="0.3"/>
+  <path d="M160 352C160 240 256 160 352 160C352 272 256 352 160 352Z" fill="#E1EDE6"/>
+  <path d="M160 352C220 300 270 240 352 160" stroke="#2D4A3E" stroke-width="20" stroke-linecap="round"/>
+  <!-- Rupiah coin badge in warm amber -->
+  <circle cx="360" cy="360" r="76" fill="#D97706" stroke="#FAF7F2" stroke-width="12"/>
+  <text x="360" y="380" font-family="'Plus Jakarta Sans', sans-serif" font-size="52" font-weight="800" fill="#FFFFFF" text-anchor="middle">Rp</text>
+</svg>
