@@ -84,7 +84,7 @@ const groupedTransactions = computed(() => {
     <div v-else class="space-y-4">
       <div v-for="group in groupedTransactions" :key="group.dayLabel" class="space-y-2">
         <!-- Date Header -->
-        <div class="sticky top-[152px] z-10 flex items-center gap-2 py-1 bg-sand-bg/95 backdrop-blur-sm">
+        <div class="sticky top-0 z-10 flex items-center gap-2 py-2 -mx-4 px-4 bg-sand-bg/95 backdrop-blur-sm">
           <span class="text-[11px] font-bold uppercase tracking-wider text-stone-warm px-2 py-0.5 rounded-md bg-sand-surface border border-sand-border/70">
             {{ group.dayLabel }}
           </span>
