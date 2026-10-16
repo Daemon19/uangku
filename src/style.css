@@ -77,3 +77,34 @@
   opacity: 0;
 }
 
+/* Bottom sheet modal transition */
+.sheet-backdrop-enter-active,
+.sheet-backdrop-leave-active {
+  transition: opacity 0.24s ease;
+}
+
+.sheet-backdrop-enter-from,
+.sheet-backdrop-leave-to {
+  opacity: 0;
+}
+
+.sheet-backdrop-enter-active .sheet-pane,
+.sheet-backdrop-leave-active .sheet-pane {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sheet-backdrop-enter-from .sheet-pane,
+.sheet-backdrop-leave-to .sheet-pane {
+  transform: translateY(100%);
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+

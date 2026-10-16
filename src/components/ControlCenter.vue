@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import type { PaymentType } from '@/db/types';
 import SpeedNumpad from './SpeedNumpad.vue';
 import SmartParserInput from './SmartParserInput.vue';
-import { LayoutGrid, Sparkles, ChevronDown } from 'lucide-vue-next';
+import { LayoutGrid, Sparkles, X } from 'lucide-vue-next';
 
 type InputMode = 'numpad' | 'nlp';
 
@@ -26,38 +26,37 @@ const currentMode = ref<InputMode>('numpad');
 </script>
 
 <template>
-  <Transition name="slide-up">
+  <Transition name="sheet-backdrop">
     <div
       v-if="isOpen"
-      class="fixed inset-0 z-40 flex justify-center bg-stone-dark/30 backdrop-blur-xs"
+      class="fixed inset-0 z-40 flex flex-col justify-end items-center bg-black/40 backdrop-blur-[1.5px]"
+      @click="emit('close')"
     >
-      <div class="w-full max-w-md h-full bg-sand-bg flex flex-col shadow-2xl border-x border-sand-border/40 overflow-hidden">
-        <!-- Top Header: V Button to Close Pane & Mode Switcher -->
-        <div class="pt-2.5 pb-2 px-3 flex items-center justify-between bg-sand-card border-b border-sand-border/60">
-          <!-- V Close Button -->
-          <button
-            type="button"
-            @click="emit('close')"
-            class="p-2 rounded-xl text-stone-warm hover:text-stone-dark hover:bg-sand-surface transition-all btn-tactile flex items-center gap-1"
-            title="Tutup Input Pane"
-            aria-label="Tutup Input Pane"
-          >
-            <ChevronDown :size="24" class="text-matcha-deep" stroke-width="2.5" />
-          </button>
+      <!-- Bottom Sheet: spans only needed height, clicks inside do not close -->
+      <div
+        class="sheet-pane w-full max-w-md bg-sand-card rounded-t-3xl shadow-2xl border-t border-sand-border/70 overflow-hidden flex flex-col max-h-[94vh]"
+        @click.stop
+      >
+        <!-- Sheet Handle & Mode Switcher Bar -->
+        <div class="pt-2 pb-1.5 px-3.5 flex items-center justify-between bg-sand-card border-b border-sand-border/40 shrink-0">
+          <!-- Grab Handle (visual cue) -->
+          <div class="w-7">
+            <div class="w-7 h-1 bg-stone-300 rounded-full"></div>
+          </div>
 
-          <!-- Mode Switcher Tabs (Without '(Numpad)' & '(Teks)') -->
-          <div class="bg-sand-surface p-1 rounded-2xl border border-sand-border/80 shadow-xs flex items-center gap-1">
+          <!-- Mode Switcher Tabs -->
+          <div class="bg-sand-surface p-0.5 rounded-xl border border-sand-border/80 shadow-xs flex items-center gap-0.5">
             <button
               type="button"
               @click="currentMode = 'numpad'"
               :class="[
-                'flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all btn-tactile',
+                'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all btn-tactile',
                 currentMode === 'numpad'
                   ? 'bg-matcha-deep text-white shadow-sm'
                   : 'text-stone-warm hover:text-stone-dark'
               ]"
             >
-              <LayoutGrid :size="14" />
+              <LayoutGrid :size="13" />
               <span>Mode Cepat</span>
             </button>
 
@@ -65,25 +64,34 @@ const currentMode = ref<InputMode>('numpad');
               type="button"
               @click="currentMode = 'nlp'"
               :class="[
-                'flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all btn-tactile',
+                'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all btn-tactile',
                 currentMode === 'nlp'
                   ? 'bg-matcha-deep text-white shadow-sm'
                   : 'text-stone-warm hover:text-stone-dark'
               ]"
             >
-              <Sparkles :size="14" class="text-amber-warm" />
+              <Sparkles :size="13" class="text-amber-warm" />
               <span>Input Pintar</span>
             </button>
           </div>
 
-          <!-- Empty balancing spacer -->
-          <div class="w-10"></div>
+          <!-- Close Button (X matching reference) -->
+          <button
+            type="button"
+            @click="emit('close')"
+            class="w-7 h-7 rounded-full bg-sand-surface hover:bg-sand-border/60 text-stone-warm hover:text-stone-dark flex items-center justify-center transition-all btn-tactile"
+            title="Tutup"
+            aria-label="Tutup"
+          >
+            <X :size="16" />
+          </button>
         </div>
 
-        <!-- Active Input Mode Component (Full-View Height) -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Active Input Mode Component (Height hugs content) -->
+        <div class="overflow-y-auto">
           <SpeedNumpad
             v-if="currentMode === 'numpad'"
+            :is-open="isOpen"
             @log-expense="emit('log-expense', $event)"
             @toast="(msg, type) => emit('toast', msg, type)"
           />
