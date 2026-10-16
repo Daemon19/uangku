@@ -56,6 +56,9 @@
 /* Tactile button press effect */
 .btn-tactile {
   transition: transform 0.08s ease, box-shadow 0.08s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .btn-tactile:active {
