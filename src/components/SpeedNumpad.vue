@@ -6,7 +6,17 @@ import { formatNumberOnly } from '@/utils/currency';
 import { db } from '@/db';
 import { useLiveQuery } from '@/composables/useLiveQuery';
 import CategoryIcon from './CategoryIcon.vue';
-import { Delete, Wallet, CreditCard, RotateCcw, MessageSquare } from 'lucide-vue-next';
+import { Delete, Wallet, CreditCard, RotateCcw, MessageSquare, CornerDownLeft } from 'lucide-vue-next';
+import {
+  createInitialNumpadState,
+  handleDigitInput,
+  handleAddThousands as addThousandsEngine,
+  handleDotInput,
+  handleBackspaceInput,
+  computeNumericAmount,
+  computeDisplayParts,
+  type NumpadState,
+} from '@/utils/numpadEngine';
 
 const props = withDefaults(
   defineProps<{
@@ -27,8 +37,9 @@ const emit = defineEmits<{
   (e: 'toast', message: string, type?: 'info' | 'warning' | 'success'): void;
 }>();
 
-// Raw numeric string buffer (e.g. "25000")
-const amountBuffer = ref('');
+// Numpad state engine
+const numpadState = ref<NumpadState>(createInitialNumpadState());
+const noteInputRef = ref<HTMLInputElement | null>(null);
 const noteText = ref('');
 const selectedPayment = ref<PaymentType>('tunai');
 const userOverrodePayment = ref(false);
@@ -132,36 +143,33 @@ watch(
   }
 );
 
-const numericAmount = computed(() => {
-  return amountBuffer.value ? parseInt(amountBuffer.value, 10) : 0;
-});
+const numericAmount = computed(() => computeNumericAmount(numpadState.value));
+const displayParts = computed(() => computeDisplayParts(numpadState.value));
 
 // Keypad handlers
 function handleDigit(digit: string) {
-  if (amountBuffer.value.length >= 11) return; // Prevent overflow beyond 99 billion
-  if (amountBuffer.value === '0' && digit === '0') return;
-  if (amountBuffer.value === '0') {
-    amountBuffer.value = digit;
-  } else {
-    amountBuffer.value += digit;
-  }
+  numpadState.value = handleDigitInput(numpadState.value, digit);
 }
 
 function handleAddThousands() {
-  if (!amountBuffer.value || amountBuffer.value === '0') return;
-  if (amountBuffer.value.length + 3 > 11) return;
-  amountBuffer.value += '000';
+  numpadState.value = addThousandsEngine(numpadState.value);
+}
+
+function handleDot() {
+  numpadState.value = handleDotInput(numpadState.value);
 }
 
 function handleBackspace() {
-  if (amountBuffer.value.length > 0) {
-    amountBuffer.value = amountBuffer.value.slice(0, -1);
-  }
+  numpadState.value = handleBackspaceInput(numpadState.value);
 }
 
 function handleClear() {
-  amountBuffer.value = '';
+  numpadState.value = createInitialNumpadState();
   noteText.value = '';
+}
+
+function handleEnter() {
+  noteInputRef.value?.focus();
 }
 
 function setPayment(type: PaymentType) {
@@ -210,7 +218,7 @@ async function handleCategoryTap(categoryName: string) {
   });
 
   // Reset inputs
-  amountBuffer.value = '';
+  numpadState.value = createInitialNumpadState();
   noteText.value = '';
   userOverrodePayment.value = false;
 }
@@ -264,15 +272,17 @@ async function handleCategoryTap(categoryName: string) {
       <!-- Main Currency & Amount Display -->
       <div class="flex items-baseline gap-1.5 py-0.5">
         <span class="text-xl sm:text-2xl font-extrabold text-matcha-deep/80 select-none">Rp</span>
-        <span class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight font-sans text-matcha-deep select-none">
-          {{ formatNumberOnly(numericAmount) }}
-        </span>
+        <div class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight font-sans select-none flex items-baseline">
+          <span class="text-matcha-deep">{{ displayParts.mainText }}</span>
+          <span v-if="displayParts.dimmedZeros" class="text-matcha-deep/30 font-bold">{{ displayParts.dimmedZeros }}</span>
+        </div>
       </div>
 
       <!-- Quick Optional Note Input: Larger text for mobile readability -->
       <div class="flex items-center gap-2 px-3 py-2 bg-sand-card rounded-xl border border-sand-border/70 focus-within:border-matcha-deep focus-within:ring-1 focus-within:ring-matcha-deep transition-all">
         <MessageSquare :size="18" class="text-stone-warm shrink-0" />
         <input
+          ref="noteInputRef"
           v-model="noteText"
           type="text"
           placeholder="Nasi padang Keputih"
@@ -406,28 +416,45 @@ async function handleCategoryTap(categoryName: string) {
       >
         9
       </button>
-      <!-- Single +000 spanning Row 3 & 4 (No Duplicates!) -->
+      <!-- Single Enter (CornerDownLeft) spanning Row 3 & 4 -->
+      <button
+        type="button"
+        @pointerdown="triggerKey(handleEnter, $event)"
+        @click="triggerKey(handleEnter, $event)"
+        class="row-span-2 h-full min-h-[114px] sm:min-h-[126px] rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
+        title="Catatan (Enter)"
+        aria-label="Catatan"
+      >
+        <CornerDownLeft :size="24" />
+      </button>
+
+      <!-- Row 4: Col 1 [ 000 ], Col 2 [ 0 ], Col 3 [ . ] -->
       <button
         type="button"
         @pointerdown="triggerKey(handleAddThousands, $event)"
         @click="triggerKey(handleAddThousands, $event)"
-        class="row-span-2 h-full min-h-[114px] sm:min-h-[126px] rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold text-sm sm:text-base border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
-        title="Tambah Ribuan (+000)"
+        title="Tambah Ribuan (000)"
+        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-base sm:text-lg border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
-        +000
+        000
       </button>
-
-      <!-- Row 4 -->
-      <div class="col-span-3">
-        <button
-          type="button"
-          @pointerdown="triggerKey(() => handleDigit('0'), $event)"
-          @click="triggerKey(() => handleDigit('0'), $event)"
-          class="w-full h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
-        >
-          0
-        </button>
-      </div>
+      <button
+        type="button"
+        @pointerdown="triggerKey(() => handleDigit('0'), $event)"
+        @click="triggerKey(() => handleDigit('0'), $event)"
+        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+      >
+        0
+      </button>
+      <button
+        type="button"
+        @pointerdown="triggerKey(handleDot, $event)"
+        @click="triggerKey(handleDot, $event)"
+        title="Titik Desimal (.)"
+        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-black text-2xl sm:text-3xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation pb-1"
+      >
+        .
+      </button>
     </div>
   </div>
 </template>
