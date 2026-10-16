@@ -87,9 +87,7 @@ Welcome to **UangKu**. This document outlines non-negotiable rules, project arch
 
 ### E. Web Audio Synthesizer
 * Sound effects reside in `src/utils/audio.ts` and are accessed via `useAudioFeedback()`:
-  - `triggerKeypress()`: Fast subtle click (750Hz -> 300Hz in 25ms).
   - `triggerSuccess()`: Arpeggiated C-major triad chime (C5 -> E5 -> G5).
-  - `triggerDelete()`: Two-stage descending cue (warning tap + swooping drop).
 * Sound respects user preference stored in `localStorage` (`uangku_sound_enabled`).
 
 ### F. Styling & Layout Philosophy

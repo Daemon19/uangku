@@ -3,7 +3,6 @@ import { ref, computed } from 'vue';
 import type { PaymentType } from '@/db/types';
 import { CATEGORIES } from '@/utils/categories';
 import { formatRupiah } from '@/utils/currency';
-import { useAudioFeedback } from '@/composables/useAudioFeedback';
 import { getPreferredPayment } from '@/db';
 import CategoryIcon from './CategoryIcon.vue';
 import { Delete, Wallet, CreditCard, RotateCcw } from 'lucide-vue-next';
@@ -17,8 +16,6 @@ const emit = defineEmits<{
   }): void;
   (e: 'toast', message: string, type?: 'info' | 'warning' | 'success'): void;
 }>();
-
-const { triggerKeypress } = useAudioFeedback();
 
 // Raw numeric string buffer (e.g. "25000")
 const amountBuffer = ref('');
@@ -38,7 +35,6 @@ const displayAmount = computed(() => {
 
 // Keypad handlers
 function handleDigit(digit: string) {
-  triggerKeypress();
   if (amountBuffer.value.length >= 11) return; // Prevent overflow beyond 99 billion
   if (amountBuffer.value === '0' && digit === '0') return;
   if (amountBuffer.value === '0') {
@@ -49,27 +45,23 @@ function handleDigit(digit: string) {
 }
 
 function handleAddThousands() {
-  triggerKeypress();
   if (!amountBuffer.value || amountBuffer.value === '0') return;
   if (amountBuffer.value.length + 3 > 11) return;
   amountBuffer.value += '000';
 }
 
 function handleBackspace() {
-  triggerKeypress();
   if (amountBuffer.value.length > 0) {
     amountBuffer.value = amountBuffer.value.slice(0, -1);
   }
 }
 
 function handleClear() {
-  triggerKeypress();
   amountBuffer.value = '';
   noteText.value = '';
 }
 
 function setPayment(type: PaymentType) {
-  triggerKeypress();
   selectedPayment.value = type;
   userOverrodePayment.value = true;
 }
@@ -77,7 +69,6 @@ function setPayment(type: PaymentType) {
 // Sub-3-Second Log Execution on Category Chip Tap
 async function handleCategoryTap(categoryName: string) {
   if (numericAmount.value <= 0) {
-    triggerKeypress();
     isShaking.value = true;
     setTimeout(() => {
       isShaking.value = false;

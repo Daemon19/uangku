@@ -18,7 +18,7 @@ import ExportModal from '@/components/ExportModal.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
 import PwaInstallPrompt from '@/components/PwaInstallPrompt.vue';
 
-const { triggerSuccess, triggerDelete } = useAudioFeedback();
+const { triggerSuccess } = useAudioFeedback();
 
 // Filter State: defaults to 'today'
 const currentFilter = ref<TimeFilter>('today');
@@ -133,7 +133,6 @@ async function handleDuplicate(tx: Transaction) {
 async function handleDelete(id: number) {
   try {
     await deleteTransaction(id);
-    triggerDelete();
     showToast('Transaksi dihapus', 'info');
   } catch (err) {
     console.error('Failed to delete transaction:', err);

@@ -1,8 +1,6 @@
 import { ref } from 'vue';
 import {
-  playKeypress as audioKeypress,
   playSuccess as audioSuccess,
-  playDelete as audioDelete,
   isSoundEnabled,
   toggleSound as audioToggleSound,
 } from '@/utils/audio';
@@ -10,16 +8,8 @@ import {
 const soundActive = ref(isSoundEnabled());
 
 export function useAudioFeedback() {
-  function triggerKeypress() {
-    audioKeypress();
-  }
-
   function triggerSuccess() {
     audioSuccess();
-  }
-
-  function triggerDelete() {
-    audioDelete();
   }
 
   function toggle() {
@@ -28,9 +18,8 @@ export function useAudioFeedback() {
 
   return {
     soundActive,
-    triggerKeypress,
     triggerSuccess,
-    triggerDelete,
     toggle,
   };
 }
+

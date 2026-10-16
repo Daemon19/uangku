@@ -5,7 +5,6 @@ import { parseSmartExpense } from '@/utils/nlpParser';
 import { formatRupiah } from '@/utils/currency';
 import { CATEGORIES, getCategoryByName } from '@/utils/categories';
 import { getPreferredPayment } from '@/db';
-import { useAudioFeedback } from '@/composables/useAudioFeedback';
 import CategoryIcon from './CategoryIcon.vue';
 import {
   Sparkles,
@@ -26,7 +25,6 @@ const emit = defineEmits<{
   (e: 'toast', message: string, type?: 'info' | 'warning' | 'success'): void;
 }>();
 
-const { triggerKeypress } = useAudioFeedback();
 
 const inputText = ref('');
 const manualCategory = ref<string | null>(null);
@@ -64,19 +62,16 @@ watch(
 );
 
 function togglePayment() {
-  triggerKeypress();
   const next = activePayment.value === 'tunai' ? 'rekening' : 'tunai';
   manualPayment.value = next;
   activePayment.value = next;
 }
 
 function selectCategory(catName: string) {
-  triggerKeypress();
   manualCategory.value = catName;
 }
 
 function handleExample(exampleText: string) {
-  triggerKeypress();
   inputText.value = exampleText;
   manualCategory.value = null;
   manualPayment.value = null;

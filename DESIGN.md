@@ -173,10 +173,8 @@ Logging an expense must never exceed 3 seconds. UangKu achieves this through two
 
 ### 6.2 Procedural Web Audio Soundscapes
 Generated in real-time via Web Audio API oscillators:
-1. **Keypress Click**: Fast, subtle sine wave ramping down from 750Hz to 300Hz in 25ms ($0.12$ peak gain).
-2. **Success Chime**: An arpeggiated C-major triad (C5 $523.25\text{Hz} \rightarrow$ E5 $659.25\text{Hz} \rightarrow$ G5 $783.99\text{Hz}$) with gentle triangle wave resonance over 280ms.
-3. **Delete Swoop**: Two-stage descending acoustic warning (520Hz tap followed by a falling 340Hz $\rightarrow$ 75Hz swoop).
-4. Audio can be toggled on/off at any time from the top header; state persists in `localStorage`.
+1. **Success Chime**: An arpeggiated C-major triad (C5 $523.25\text{Hz} \rightarrow$ E5 $659.25\text{Hz} \rightarrow$ G5 $783.99\text{Hz}$) with gentle triangle wave resonance over 320ms.
+2. Audio can be toggled on/off at any time from the top header; state persists in `localStorage`.
 
 ---
 

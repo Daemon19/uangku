@@ -132,9 +132,7 @@ Binds Dexie's RxJS-style `liveQuery` observable to a Vue 3 `ref`.
 
 #### `useAudioFeedback.ts`
 Provides reactive controls for UI audio cues:
-* `triggerKeypress()`: Click feedback on keypad inputs.
 * `triggerSuccess()`: Triad chime on expense creation and duplication.
-* `triggerDelete()`: Descending audio cue on expense deletion.
 * `toggle()`: Flips sound enabled state and saves to `localStorage`.
 * `soundActive`: Reactive boolean reflecting current sound state.
 
@@ -172,11 +170,7 @@ Registers the 9 core categories:
 
 #### `audio.ts`
 Implements a procedural sound synthesizer using the native `AudioContext`:
-* `playKeypress()`: Sine wave ramping 750Hz $\rightarrow$ 300Hz in 25ms.
 * `playSuccess()`: Arpeggiated C-major triad (C5 $523.25\text{Hz}$, E5 $659.25\text{Hz}$, G5 $783.99\text{Hz}$) with triangle wave oscillators.
-* `playDelete()`: Two-stage acoustic cue:
-  - Stage 1: Crisp high-mid tap (520Hz $\rightarrow$ 420Hz in 50ms).
-  - Stage 2: Deep swooping drop (340Hz $\rightarrow$ 75Hz over 180ms).
 
 #### `currency.ts` & `date.ts`
 * `currency.ts`: `formatRupiah(amount)` produces `Rp 25.000`; `formatCompactRupiah(amount)` produces `25 rb` or `1,5 jt`.
