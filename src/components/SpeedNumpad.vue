@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import type { PaymentType } from '@/db/types';
 import { CATEGORIES } from '@/utils/categories';
 import { formatNumberOnly } from '@/utils/currency';
 import { db } from '@/db';
 import { useLiveQuery } from '@/composables/useLiveQuery';
+import { extractUniqueNotes, rankPastNotes } from '@/utils/fuzzyNotes';
 import CategoryIcon from './CategoryIcon.vue';
-import { Delete, Wallet, CreditCard, RotateCcw, MessageSquare, CornerDownLeft, LayoutGrid } from 'lucide-vue-next';
+import { Delete, Wallet, CreditCard, RotateCcw, CornerDownLeft, LayoutGrid } from 'lucide-vue-next';
 import {
   createInitialNumpadState,
   handleDigitInput,
@@ -52,6 +53,27 @@ const allTransactions = useLiveQuery(
   () => db.transactions.toArray(),
   []
 );
+
+// Past notes extraction & typo-tolerant fuzzy ranking
+const pastNotes = computed(() => extractUniqueNotes(allTransactions.value || []));
+
+const suggestedNotes = computed(() => {
+  if (!isNoteFocused.value || !noteText.value.trim()) {
+    return [];
+  }
+  return rankPastNotes(noteText.value, pastNotes.value, 6);
+});
+
+function applySuggestedNote(suggestion: string) {
+  noteText.value = suggestion;
+  nextTick(() => {
+    if (noteInputRef.value) {
+      noteInputRef.value.focus();
+      const len = suggestion.length;
+      noteInputRef.value.setSelectionRange(len, len);
+    }
+  });
+}
 
 // Set payment choice same as the last transaction
 async function syncPaymentWithLastTransaction() {
@@ -264,9 +286,8 @@ async function handleCategoryTap(categoryName: string) {
         </div>
       </div>
 
-      <!-- Quick Optional Note Input: Larger text for mobile readability -->
-      <div class="flex items-center gap-2 px-3 py-2 bg-sand-card rounded-xl border border-sand-border/70 focus-within:border-matcha-deep focus-within:ring-1 focus-within:ring-matcha-deep transition-all">
-        <MessageSquare :size="18" class="text-stone-warm shrink-0" />
+      <!-- Quick Note Input: Larger text for mobile readability without message icon or optional label -->
+      <div class="flex items-center px-3.5 py-2.5 bg-sand-card rounded-xl border border-sand-border/70 focus-within:border-matcha-deep focus-within:ring-1 focus-within:ring-matcha-deep transition-all">
         <input
           ref="noteInputRef"
           v-model="noteText"
@@ -277,9 +298,30 @@ async function handleCategoryTap(categoryName: string) {
           @keyup.enter="restoreNumpad"
           class="w-full text-base sm:text-lg font-medium bg-transparent border-0 text-stone-dark placeholder:text-stone-muted focus:outline-none focus:ring-0 p-0"
         />
-        <span v-if="!noteText" class="text-xs text-stone-muted select-none shrink-0 font-medium">
-          (Opsional)
-        </span>
+      </div>
+
+      <!-- Fuzzy Note Suggestions Ribbon (Under note input with reserved height to prevent layout shift) -->
+      <div
+        v-show="isNoteFocused"
+        class="min-h-[42px] flex items-center -mt-0.5"
+      >
+        <Transition name="fade">
+          <div
+            v-if="suggestedNotes.length > 0"
+            class="w-full flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar touch-pan-x"
+          >
+            <button
+              v-for="suggestion in suggestedNotes"
+              :key="suggestion"
+              type="button"
+              @pointerdown.prevent="applySuggestedNote(suggestion)"
+              @click.prevent="applySuggestedNote(suggestion)"
+              class="shrink-0 px-3.5 py-1.5 rounded-xl bg-sand-card hover:bg-matcha-50 border border-sand-border/80 hover:border-matcha-300 text-xs sm:text-sm font-semibold text-stone-dark transition-all btn-tactile active:scale-95 shadow-2xs flex items-center justify-center min-h-[36px]"
+            >
+              <span>{{ suggestion }}</span>
+            </button>
+          </div>
+        </Transition>
       </div>
     </div>
 
