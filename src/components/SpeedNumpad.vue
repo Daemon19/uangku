@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import type { PaymentType, CategoryItem, Transaction } from '@/db/types';
+import type { PaymentType } from '@/db/types';
 import { CATEGORIES } from '@/utils/categories';
 import { formatNumberOnly } from '@/utils/currency';
 import { db } from '@/db';
@@ -65,54 +65,15 @@ async function syncPaymentWithLastTransaction() {
   }
 }
 
-// Frozen categories list: initialized upon pane opening, preserved while pane is opened
-const sortedCategories = ref<CategoryItem[]>([...CATEGORIES]);
-let hasFrozenCategories = false;
-
-function sortCategoriesList(txs: Transaction[]) {
-  if (!txs || txs.length === 0) return;
-  hasFrozenCategories = true;
-  const counts = new Map<string, number>();
-  for (const tx of txs) {
-    counts.set(tx.category, (counts.get(tx.category) || 0) + 1);
-  }
-
-  sortedCategories.value = [...CATEGORIES].sort((a, b) => {
-    const countA = counts.get(a.name) || 0;
-    const countB = counts.get(b.name) || 0;
-    if (countB !== countA) {
-      return countB - countA;
-    }
-    return 0;
-  });
-}
-
-async function updateCategoryOrder() {
-  if (allTransactions.value && allTransactions.value.length > 0) {
-    sortCategoriesList(allTransactions.value);
-    return;
-  }
-  try {
-    const txs = await db.transactions.toArray();
-    sortCategoriesList(txs);
-  } catch (err) {
-    console.debug('Failed to sort categories on open:', err);
-  }
-}
-
 onMounted(() => {
-  // If data is already in memory from live query, sort instantly without blocking IPC
   if (allTransactions.value && allTransactions.value.length > 0) {
-    sortCategoriesList(allTransactions.value);
     const lastTx = allTransactions.value[allTransactions.value.length - 1];
     if (lastTx && (lastTx.type === 'tunai' || lastTx.type === 'rekening')) {
       selectedPayment.value = lastTx.type;
     }
   } else {
-    // Defer async database calls by 1 frame to keep pop-up animation smooth
     requestAnimationFrame(() => {
       syncPaymentWithLastTransaction();
-      updateCategoryOrder();
     });
   }
 });
@@ -120,10 +81,6 @@ onMounted(() => {
 watch(
   allTransactions,
   (txs) => {
-    // If initial seed data loads on first launch, sort once
-    if (!hasFrozenCategories && txs && txs.length > 0) {
-      updateCategoryOrder();
-    }
     if (!userOverrodePayment.value && txs && txs.length > 0) {
       const lastTx = txs[txs.length - 1];
       if (lastTx && (lastTx.type === 'tunai' || lastTx.type === 'rekening')) {
@@ -133,14 +90,13 @@ watch(
   }
 );
 
-// Re-sort only when the pane transitions from closed to open
 watch(
   () => props.isOpen,
   (newOpen) => {
     if (newOpen) {
-      hasFrozenCategories = false;
-      updateCategoryOrder();
       syncPaymentWithLastTransaction();
+    } else {
+      restoreNumpad();
     }
   }
 );
@@ -252,10 +208,13 @@ async function handleCategoryTap(categoryName: string) {
 </script>
 
 <template>
-  <div class="bg-sand-card px-3.5 pt-2 pb-4 flex flex-col justify-start gap-2">
+  <div
+    class="flex-1 flex flex-col p-3.5 sm:p-4 bg-sand-bg select-none overflow-y-auto"
+    :class="isNoteFocused ? 'justify-start gap-4' : 'justify-between'"
+  >
     <!-- Amount Display & Note Row (Above Category Picker) -->
     <div
-      class="bg-sand-surface rounded-2xl p-3 sm:p-3.5 border border-sand-border/80 transition-all flex flex-col gap-2 shadow-xs"
+      class="bg-sand-surface rounded-2xl p-3 sm:p-3.5 border border-sand-border/80 transition-all flex flex-col gap-2 shadow-xs shrink-0"
       :class="{ 'animate-shake border-red-400 bg-red-50/50': isShaking }"
     >
       <!-- Top Row: Payment Switcher & Amount Heading -->
@@ -324,10 +283,12 @@ async function handleCategoryTap(categoryName: string) {
       </div>
     </div>
 
-    <!-- Category Direct-Log Row: 1 Row, Horizontally Scrollable, Sorted by Most Used -->
-    <div>
-      <div class="px-1 mb-1.5 flex items-center justify-between">
-        <span class="text-xs font-bold text-stone-warm uppercase tracking-wider">Kategori</span>
+    <!-- Category Direct-Log Matrix (Sub-3-Second Trigger) -->
+    <div class="shrink-0 mb-1">
+      <div class="flex items-center justify-between mb-1.5 px-1">
+        <span class="text-xs font-bold text-stone-warm uppercase tracking-wider flex items-center gap-1">
+          Kategori
+        </span>
         <button
           v-if="isNoteFocused"
           type="button"
@@ -340,21 +301,25 @@ async function handleCategoryTap(categoryName: string) {
         </button>
       </div>
 
-      <div
-        class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 touch-pan-x overscroll-x-contain"
-        style="-webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;"
-      >
+      <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
         <button
-          v-for="cat in sortedCategories"
+          v-for="cat in CATEGORIES"
           :key="cat.id"
           type="button"
           @click="handleCategoryTap(cat.name)"
-          :title="cat.name"
-          :aria-label="cat.name"
-          class="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center shrink-0 border border-sand-border/70 active:scale-95 transition-transform duration-75 select-none touch-manipulation shadow-xs"
-          :style="{ backgroundColor: cat.bgLight, color: cat.color }"
+          class="flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl bg-sand-surface hover:bg-matcha-50 border border-sand-border/70 hover:border-matcha-300 text-stone-dark transition-all text-left group btn-tactile active:scale-95 shadow-xs"
         >
-          <CategoryIcon :category="cat.name" :size="22" />
+          <div
+            class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0 border border-black/5"
+            :style="{ backgroundColor: cat.bgLight, color: cat.color }"
+          >
+            <CategoryIcon :category="cat.name" :size="16" />
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold truncate leading-tight group-hover:text-matcha-deep">
+              {{ cat.name }}
+            </div>
+          </div>
         </button>
       </div>
     </div>
@@ -369,7 +334,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('1'), $event)"
         @click="triggerKey(() => handleDigit('1'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         1
       </button>
@@ -377,7 +342,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('2'), $event)"
         @click="triggerKey(() => handleDigit('2'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         2
       </button>
@@ -385,7 +350,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('3'), $event)"
         @click="triggerKey(() => handleDigit('3'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         3
       </button>
@@ -394,7 +359,7 @@ async function handleCategoryTap(categoryName: string) {
         @pointerdown="triggerKey(handleBackspace, $event)"
         @click="triggerKey(handleBackspace, $event)"
         title="Hapus Digit Terakhir"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
       >
         <Delete :size="20" />
       </button>
@@ -404,7 +369,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('4'), $event)"
         @click="triggerKey(() => handleDigit('4'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         4
       </button>
@@ -412,7 +377,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('5'), $event)"
         @click="triggerKey(() => handleDigit('5'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         5
       </button>
@@ -420,7 +385,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('6'), $event)"
         @click="triggerKey(() => handleDigit('6'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         6
       </button>
@@ -429,7 +394,7 @@ async function handleCategoryTap(categoryName: string) {
         @pointerdown="triggerKey(handleClear, $event)"
         @click="triggerKey(handleClear, $event)"
         title="Reset Nominal"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
       >
         <RotateCcw :size="19" />
       </button>
@@ -439,7 +404,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('7'), $event)"
         @click="triggerKey(() => handleDigit('7'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         7
       </button>
@@ -447,7 +412,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('8'), $event)"
         @click="triggerKey(() => handleDigit('8'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         8
       </button>
@@ -455,7 +420,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('9'), $event)"
         @click="triggerKey(() => handleDigit('9'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         9
       </button>
@@ -463,7 +428,7 @@ async function handleCategoryTap(categoryName: string) {
       <button
         type="button"
         @click="handleEnter"
-        class="row-span-2 h-full min-h-[114px] sm:min-h-[126px] rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
+        class="row-span-2 h-full min-h-[124px] sm:min-h-[140px] rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
         title="Catatan (Enter)"
         aria-label="Catatan"
       >
@@ -476,7 +441,7 @@ async function handleCategoryTap(categoryName: string) {
         @pointerdown="triggerKey(handleAddThousands, $event)"
         @click="triggerKey(handleAddThousands, $event)"
         title="Tambah Ribuan (000)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-base sm:text-lg border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-base sm:text-lg border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         000
       </button>
@@ -484,7 +449,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('0'), $event)"
         @click="triggerKey(() => handleDigit('0'), $event)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         0
       </button>
@@ -493,7 +458,7 @@ async function handleCategoryTap(categoryName: string) {
         @pointerdown="triggerKey(handleDot, $event)"
         @click="triggerKey(handleDot, $event)"
         title="Titik Desimal (.)"
-        class="h-[54px] sm:h-[60px] rounded-2xl bg-sand-card text-stone-dark font-black text-2xl sm:text-3xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation pb-1"
+        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-black text-2xl sm:text-3xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation pb-1"
       >
         .
       </button>
