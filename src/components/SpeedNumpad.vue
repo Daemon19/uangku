@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import type { PaymentType, CategoryItem } from '@/db/types';
+import type { PaymentType, CategoryItem, Transaction } from '@/db/types';
 import { CATEGORIES } from '@/utils/categories';
 import { formatNumberOnly } from '@/utils/currency';
 import { db } from '@/db';
@@ -56,33 +56,52 @@ async function syncPaymentWithLastTransaction() {
 const sortedCategories = ref<CategoryItem[]>([...CATEGORIES]);
 let hasFrozenCategories = false;
 
+function sortCategoriesList(txs: Transaction[]) {
+  if (!txs || txs.length === 0) return;
+  hasFrozenCategories = true;
+  const counts = new Map<string, number>();
+  for (const tx of txs) {
+    counts.set(tx.category, (counts.get(tx.category) || 0) + 1);
+  }
+
+  sortedCategories.value = [...CATEGORIES].sort((a, b) => {
+    const countA = counts.get(a.name) || 0;
+    const countB = counts.get(b.name) || 0;
+    if (countB !== countA) {
+      return countB - countA;
+    }
+    return 0;
+  });
+}
+
 async function updateCategoryOrder() {
+  if (allTransactions.value && allTransactions.value.length > 0) {
+    sortCategoriesList(allTransactions.value);
+    return;
+  }
   try {
     const txs = await db.transactions.toArray();
-    if (txs.length > 0) {
-      hasFrozenCategories = true;
-    }
-    const counts = new Map<string, number>();
-    for (const tx of txs) {
-      counts.set(tx.category, (counts.get(tx.category) || 0) + 1);
-    }
-
-    sortedCategories.value = [...CATEGORIES].sort((a, b) => {
-      const countA = counts.get(a.name) || 0;
-      const countB = counts.get(b.name) || 0;
-      if (countB !== countA) {
-        return countB - countA;
-      }
-      return 0;
-    });
+    sortCategoriesList(txs);
   } catch (err) {
     console.debug('Failed to sort categories on open:', err);
   }
 }
 
 onMounted(() => {
-  syncPaymentWithLastTransaction();
-  updateCategoryOrder();
+  // If data is already in memory from live query, sort instantly without blocking IPC
+  if (allTransactions.value && allTransactions.value.length > 0) {
+    sortCategoriesList(allTransactions.value);
+    const lastTx = allTransactions.value[allTransactions.value.length - 1];
+    if (lastTx && (lastTx.type === 'tunai' || lastTx.type === 'rekening')) {
+      selectedPayment.value = lastTx.type;
+    }
+  } else {
+    // Defer async database calls by 1 frame to keep pop-up animation smooth
+    requestAnimationFrame(() => {
+      syncPaymentWithLastTransaction();
+      updateCategoryOrder();
+    });
+  }
 });
 
 watch(
@@ -271,7 +290,10 @@ async function handleCategoryTap(categoryName: string) {
         <span class="text-xs font-bold text-stone-warm uppercase tracking-wider">Kategori</span>
       </div>
 
-      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 touch-pan-x">
+      <div
+        class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 touch-pan-x overscroll-x-contain"
+        style="-webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;"
+      >
         <button
           v-for="cat in sortedCategories"
           :key="cat.id"
@@ -279,7 +301,7 @@ async function handleCategoryTap(categoryName: string) {
           @click="handleCategoryTap(cat.name)"
           :title="cat.name"
           :aria-label="cat.name"
-          class="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center shrink-0 border border-sand-border/70 hover:scale-105 active:scale-95 transition-all shadow-xs btn-tactile"
+          class="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center shrink-0 border border-sand-border/70 active:scale-95 transition-transform duration-75 select-none touch-manipulation shadow-xs"
           :style="{ backgroundColor: cat.bgLight, color: cat.color }"
         >
           <CategoryIcon :category="cat.name" :size="22" />

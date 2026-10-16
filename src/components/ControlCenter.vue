@@ -29,12 +29,13 @@ const currentMode = ref<InputMode>('numpad');
   <Transition name="sheet-backdrop">
     <div
       v-if="isOpen"
-      class="fixed inset-0 z-40 flex flex-col justify-end items-center bg-black/40 backdrop-blur-[1.5px]"
+      class="fixed inset-0 z-40 flex flex-col justify-end items-center bg-black/45"
       @click="emit('close')"
     >
       <!-- Bottom Sheet: spans only needed height, clicks inside do not close -->
       <div
-        class="sheet-pane w-full max-w-md bg-sand-card rounded-t-3xl shadow-2xl border-t border-sand-border/70 overflow-hidden flex flex-col max-h-[94vh]"
+        class="sheet-pane w-full max-w-md bg-sand-card rounded-t-3xl shadow-xl border-t border-sand-border/70 overflow-hidden flex flex-col max-h-[94vh]"
+        style="transform: translateZ(0); will-change: transform;"
         @click.stop
       >
         <!-- Sheet Handle & Mode Switcher Bar -->
@@ -88,7 +89,7 @@ const currentMode = ref<InputMode>('numpad');
         </div>
 
         <!-- Active Input Mode Component (Height hugs content) -->
-        <div class="overflow-y-auto">
+        <div class="overflow-y-auto overscroll-contain">
           <SpeedNumpad
             v-if="currentMode === 'numpad'"
             :is-open="isOpen"

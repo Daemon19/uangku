@@ -90,12 +90,13 @@
 
 .sheet-backdrop-enter-active .sheet-pane,
 .sheet-backdrop-leave-active .sheet-pane {
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .sheet-backdrop-enter-from .sheet-pane,
 .sheet-backdrop-leave-to .sheet-pane {
-  transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
 }
 
 /* Hide scrollbar utility */
