@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import type { PaymentType } from '@/db/types';
 import SpeedNumpad from './SpeedNumpad.vue';
 import SmartParserInput from './SmartParserInput.vue';
@@ -23,6 +23,27 @@ const emit = defineEmits<{
 }>();
 
 const currentMode = ref<InputMode>('numpad');
+const keyboardOffset = ref(0);
+
+function handleViewportChange() {
+  if (typeof window === 'undefined' || !window.visualViewport) return;
+  const diff = window.innerHeight - window.visualViewport.height;
+  keyboardOffset.value = diff > 100 ? diff : 0;
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined' && window.visualViewport) {
+    window.visualViewport.addEventListener('resize', handleViewportChange);
+    window.visualViewport.addEventListener('scroll', handleViewportChange);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined' && window.visualViewport) {
+    window.visualViewport.removeEventListener('resize', handleViewportChange);
+    window.visualViewport.removeEventListener('scroll', handleViewportChange);
+  }
+});
 </script>
 
 <template>
@@ -34,10 +55,14 @@ const currentMode = ref<InputMode>('numpad');
     >
       <!-- Bottom Sheet: spans only needed height, clicks inside do not close -->
       <div
-        class="sheet-pane w-full max-w-md bg-sand-card rounded-t-3xl shadow-xl border-t border-sand-border/70 overflow-hidden flex flex-col max-h-[94vh]"
-        style="transform: translateZ(0); will-change: transform;"
+        class="sheet-pane w-full max-w-md bg-sand-card rounded-t-3xl shadow-xl border-t border-sand-border/70 overflow-hidden flex flex-col max-h-[94vh] transition-[margin] duration-150"
+        :style="[
+          'transform: translateZ(0); will-change: transform;',
+          keyboardOffset > 0 ? { marginBottom: `${keyboardOffset}px` } : {}
+        ]"
         @click.stop
       >
+
         <!-- Sheet Handle & Mode Switcher Bar -->
         <div class="pt-2 pb-1.5 px-3.5 flex items-center justify-between bg-sand-card border-b border-sand-border/40 shrink-0">
           <!-- Grab Handle (visual cue) -->

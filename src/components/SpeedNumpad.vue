@@ -6,7 +6,7 @@ import { formatNumberOnly } from '@/utils/currency';
 import { db } from '@/db';
 import { useLiveQuery } from '@/composables/useLiveQuery';
 import CategoryIcon from './CategoryIcon.vue';
-import { Delete, Wallet, CreditCard, RotateCcw, MessageSquare, CornerDownLeft } from 'lucide-vue-next';
+import { Delete, Wallet, CreditCard, RotateCcw, MessageSquare, CornerDownLeft, LayoutGrid } from 'lucide-vue-next';
 import {
   createInitialNumpadState,
   handleDigitInput,
@@ -44,6 +44,8 @@ const noteText = ref('');
 const selectedPayment = ref<PaymentType>('tunai');
 const userOverrodePayment = ref(false);
 const isShaking = ref(false);
+const isNoteFocused = ref(false);
+let blurTimeout: ReturnType<typeof setTimeout> | null = null;
 
 // Query all transactions to track last used payment
 const allTransactions = useLiveQuery(
@@ -163,12 +165,36 @@ function handleBackspace() {
   numpadState.value = handleBackspaceInput(numpadState.value);
 }
 
+function handleNoteFocus() {
+  if (blurTimeout) {
+    clearTimeout(blurTimeout);
+    blurTimeout = null;
+  }
+  isNoteFocused.value = true;
+}
+
+function handleNoteBlur() {
+  if (blurTimeout) clearTimeout(blurTimeout);
+  blurTimeout = setTimeout(() => {
+    isNoteFocused.value = false;
+  }, 200);
+}
+
+function restoreNumpad() {
+  if (blurTimeout) clearTimeout(blurTimeout);
+  isNoteFocused.value = false;
+  noteInputRef.value?.blur();
+}
+
 function handleClear() {
   numpadState.value = createInitialNumpadState();
   noteText.value = '';
+  restoreNumpad();
 }
 
-function handleEnter() {
+function handleEnter(event?: Event) {
+  event?.preventDefault();
+  handleNoteFocus();
   noteInputRef.value?.focus();
 }
 
@@ -221,6 +247,7 @@ async function handleCategoryTap(categoryName: string) {
   numpadState.value = createInitialNumpadState();
   noteText.value = '';
   userOverrodePayment.value = false;
+  restoreNumpad();
 }
 </script>
 
@@ -286,6 +313,9 @@ async function handleCategoryTap(categoryName: string) {
           v-model="noteText"
           type="text"
           placeholder="Nasi padang Keputih"
+          @focus="handleNoteFocus"
+          @blur="handleNoteBlur"
+          @keyup.enter="restoreNumpad"
           class="w-full text-base sm:text-lg font-medium bg-transparent border-0 text-stone-dark placeholder:text-stone-muted focus:outline-none focus:ring-0 p-0"
         />
         <span v-if="!noteText" class="text-xs text-stone-muted select-none shrink-0 font-medium">
@@ -298,6 +328,16 @@ async function handleCategoryTap(categoryName: string) {
     <div>
       <div class="px-1 mb-1.5 flex items-center justify-between">
         <span class="text-xs font-bold text-stone-warm uppercase tracking-wider">Kategori</span>
+        <button
+          v-if="isNoteFocused"
+          type="button"
+          @click="restoreNumpad"
+          class="text-xs font-bold text-matcha-deep flex items-center gap-1 hover:underline btn-tactile px-2 py-0.5 rounded-lg bg-matcha-100/70"
+          title="Tampilkan Numpad"
+        >
+          <LayoutGrid :size="12" />
+          <span>Numpad</span>
+        </button>
       </div>
 
       <div
@@ -319,8 +359,11 @@ async function handleCategoryTap(categoryName: string) {
       </div>
     </div>
 
-    <!-- Speed Numeric Keypad (Enlarged Vertically & Clean Layout) -->
-    <div class="grid grid-cols-4 gap-1.5 sm:gap-2 select-none touch-manipulation">
+    <!-- Speed Numeric Keypad (Hidden while note input is focused so category picker sits above keyboard) -->
+    <div
+      v-show="!isNoteFocused"
+      class="grid grid-cols-4 gap-1.5 sm:gap-2 select-none touch-manipulation"
+    >
       <!-- Row 1 -->
       <button
         type="button"
@@ -419,8 +462,7 @@ async function handleCategoryTap(categoryName: string) {
       <!-- Single Enter (CornerDownLeft) spanning Row 3 & 4 -->
       <button
         type="button"
-        @pointerdown="triggerKey(handleEnter, $event)"
-        @click="triggerKey(handleEnter, $event)"
+        @click="handleEnter"
         class="row-span-2 h-full min-h-[114px] sm:min-h-[126px] rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
         title="Catatan (Enter)"
         aria-label="Catatan"
