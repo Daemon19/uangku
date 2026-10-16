@@ -133,7 +133,7 @@ const periodSubtitle = computed(() => {
       </div>
 
       <div class="text-2xl sm:text-3xl font-extrabold tracking-tight font-sans text-white mb-3">
-        {{ formatRupiah(totalAmount) }}
+        - {{ formatRupiah(totalAmount) }}
       </div>
 
       <!-- Payment Split Pills: Tunai vs Rekening -->
