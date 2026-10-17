@@ -1,5 +1,3 @@
-## NEVER COMMIT CHANGES TO GIT
-
 # Operational Guidelines & Rules for AI Agents
 
 Welcome to **UangKu**. This document outlines non-negotiable rules, project architecture principles, development workflows, and coding conventions for AI agents operating in this repository.
@@ -8,8 +6,8 @@ Welcome to **UangKu**. This document outlines non-negotiable rules, project arch
 
 ## 1. Golden Rules & Guardrails
 
-1. **NEVER COMMIT CHANGES TO GIT**
-   - Under no circumstances should an agent run `git commit`, `git push`, or modify git history. All changes must remain unstaged or staged in the working tree for the user to review and commit.
+1. **Git Commit Guidelines**
+   - Follow clean, conventional commit messages when creating commits. Only commit when requested by the user, and never push to remote repositories (`git push`) unless explicitly asked.
 2. **Offline-First & Local-Only (Dexie.js / IndexedDB)**
    - Do not introduce remote server dependencies, REST backends, GraphQL, or external cloud databases. UangKu is 100% client-side and offline-first using Dexie.js (IndexedDB).
 3. **Zero External Audio Assets**
@@ -105,5 +103,5 @@ Welcome to **UangKu**. This document outlines non-negotiable rules, project arch
 Before reporting completion on any code modification:
 - [ ] Ran `npm run typecheck` and resolved all TypeScript errors.
 - [ ] Ran `npm run test` and ensured all Vitest test suites pass.
-- [ ] Verified no git commit was made (`git status` shows clean commit history).
+- [ ] If committing, verified commit messages follow conventional commits and did not push to remote.
 - [ ] Maintained documentation integrity and preserved existing comments.
