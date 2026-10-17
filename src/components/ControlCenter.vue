@@ -32,9 +32,9 @@ const currentMode = ref<InputMode>('numpad');
       class="fixed inset-0 z-40 flex justify-center bg-stone-dark/30 backdrop-blur-xs"
       @click.self="emit('close')"
     >
-      <div class="w-full max-w-md h-full bg-sand-bg flex flex-col shadow-2xl border-x border-sand-border/40 overflow-hidden">
+      <div class="w-full max-w-md h-[100dvh] max-h-[100dvh] bg-sand-bg flex flex-col shadow-2xl border-x border-sand-border/40 overflow-hidden">
         <!-- Top Header: V Button to Close Pane & Mode Switcher -->
-        <div class="pt-2.5 pb-2 px-3 flex items-center justify-between bg-sand-card border-b border-sand-border/60 shrink-0">
+        <div class="pt-2 pb-1.5 px-3 flex items-center justify-between bg-sand-card border-b border-sand-border/60 shrink-0">
           <!-- V Close Button -->
           <button
             type="button"

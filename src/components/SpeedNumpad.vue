@@ -233,18 +233,18 @@ async function handleCategoryTap(categoryName: string) {
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col justify-between p-3.5 sm:p-4 bg-sand-bg select-none overflow-y-auto">
+  <div class="flex-1 flex flex-col justify-between p-2.5 sm:p-4 bg-sand-bg select-none overflow-hidden">
     <!-- Top Static Section: Amount -> Note Input + Ribbon -> Category Matrix -->
-    <div class="flex flex-col gap-2.5 sm:gap-3 shrink-0">
+    <div class="flex flex-col gap-2 sm:gap-3 shrink-0">
       <!-- Amount Display & Note Row -->
       <div
-        class="bg-sand-surface rounded-2xl p-3 sm:p-3.5 border border-sand-border/80 transition-all flex flex-col gap-2 shadow-xs shrink-0"
+        class="bg-sand-surface rounded-2xl p-2.5 sm:p-3.5 border border-sand-border/80 transition-all flex flex-col gap-1.5 sm:gap-2 shadow-xs shrink-0"
         :class="{ 'animate-shake border-red-400 bg-red-50/50': isShaking }"
       >
-      <div class="flex items-baseline gap-1.5 py-0.5">
+        <div class="flex items-baseline gap-1.5 py-0.5">
           <!-- Main Currency & Amount Display -->
-          <span class="text-xl sm:text-2xl font-extrabold text-matcha-deep/80 select-none">Rp</span>
-          <div class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight font-sans select-none flex items-baseline">
+          <span class="text-lg sm:text-2xl font-extrabold text-matcha-deep/80 select-none">Rp</span>
+          <div class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight font-sans select-none flex items-baseline">
             <span class="text-matcha-deep">{{ displayParts.mainText }}</span>
             <span v-if="displayParts.dimmedZeros" class="text-matcha-deep/30 font-bold">{{ displayParts.dimmedZeros }}</span>
           </div>
@@ -256,7 +256,7 @@ async function handleCategoryTap(categoryName: string) {
               @pointerdown="triggerKey(() => setPayment('tunai'), $event)"
               @click="triggerKey(() => setPayment('tunai'), $event)"
               :class="[
-                'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all btn-tactile',
+                'flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all btn-tactile',
                 selectedPayment === 'tunai'
                   ? 'bg-amber-warm text-white shadow-xs'
                   : 'text-stone-warm hover:text-stone-dark'
@@ -271,7 +271,7 @@ async function handleCategoryTap(categoryName: string) {
               @pointerdown="triggerKey(() => setPayment('rekening'), $event)"
               @click="triggerKey(() => setPayment('rekening'), $event)"
               :class="[
-                'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all btn-tactile',
+                'flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all btn-tactile',
                 selectedPayment === 'rekening'
                   ? 'bg-matcha-deep text-white shadow-xs'
                   : 'text-stone-warm hover:text-stone-dark'
@@ -284,7 +284,7 @@ async function handleCategoryTap(categoryName: string) {
         </div>
 
         <!-- Quick Note Input: Larger text for mobile readability without message icon or optional label -->
-        <div class="flex items-center px-3.5 py-2.5 bg-sand-card rounded-xl border border-sand-border/70 focus-within:border-matcha-deep focus-within:ring-1 focus-within:ring-matcha-deep transition-all">
+        <div class="flex items-center px-3 py-1.5 sm:px-3.5 sm:py-2.5 bg-sand-card rounded-xl border border-sand-border/70 focus-within:border-matcha-deep focus-within:ring-1 focus-within:ring-matcha-deep transition-all">
           <input
             ref="noteInputRef"
             v-model="noteText"
@@ -293,12 +293,12 @@ async function handleCategoryTap(categoryName: string) {
             @focus="handleNoteFocus"
             @blur="handleNoteBlur"
             @keyup.enter="restoreNumpad"
-            class="w-full text-base sm:text-lg font-medium bg-transparent border-0 text-stone-dark placeholder:text-stone-muted focus:outline-none focus:ring-0 p-0"
+            class="w-full text-sm sm:text-lg font-medium bg-transparent border-0 text-stone-dark placeholder:text-stone-muted focus:outline-none focus:ring-0 p-0"
           />
         </div>
 
         <!-- Fuzzy Note Suggestions Ribbon (Permanently reserved slot, never collapses, stays shown on blur) -->
-        <div class="h-[42px] flex items-center -mt-0.5">
+        <div class="h-[34px] sm:h-[42px] flex items-center -mt-0.5">
           <Transition name="fade">
             <div
               v-if="suggestedNotes.length > 0"
@@ -310,7 +310,7 @@ async function handleCategoryTap(categoryName: string) {
                 type="button"
                 @pointerdown.prevent="applySuggestedNote(suggestion)"
                 @click.prevent="applySuggestedNote(suggestion)"
-                class="shrink-0 px-3.5 py-1.5 rounded-xl bg-sand-card hover:bg-matcha-50 border border-sand-border/80 hover:border-matcha-300 text-xs sm:text-sm font-semibold text-stone-dark transition-all btn-tactile active:scale-95 shadow-2xs flex items-center justify-center min-h-[36px]"
+                class="shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl bg-sand-card hover:bg-matcha-50 border border-sand-border/80 hover:border-matcha-300 text-xs sm:text-sm font-semibold text-stone-dark transition-all btn-tactile active:scale-95 shadow-2xs flex items-center justify-center min-h-[28px] sm:min-h-[36px]"
               >
                 <span>{{ suggestion }}</span>
               </button>
@@ -327,16 +327,16 @@ async function handleCategoryTap(categoryName: string) {
             :key="cat.id"
             type="button"
             @click="handleCategoryTap(cat.name)"
-            class="flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl bg-sand-surface hover:bg-matcha-50 border border-sand-border/70 hover:border-matcha-300 text-stone-dark transition-all text-left group btn-tactile active:scale-95 shadow-xs"
+            class="category-card bg-sand-surface hover:bg-matcha-50 border border-sand-border/70 hover:border-matcha-300 text-stone-dark transition-all group btn-tactile active:scale-95 shadow-xs"
           >
             <div
-              class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0 border border-black/5"
+              class="category-card-icon flex items-center justify-center shrink-0 border border-black/5"
               :style="{ backgroundColor: cat.bgLight, color: cat.color }"
             >
               <CategoryIcon :category="cat.name" :size="16" />
             </div>
-            <div class="min-w-0">
-              <div class="text-xs font-bold truncate leading-tight group-hover:text-matcha-deep">
+            <div class="min-w-0 w-full">
+              <div class="category-card-label font-bold truncate leading-tight group-hover:text-matcha-deep">
                 {{ cat.name }}
               </div>
             </div>
@@ -348,14 +348,14 @@ async function handleCategoryTap(categoryName: string) {
     <!-- Speed Numeric Keypad (Hidden while note input is focused so keyboard takes bottom space) -->
     <div
       v-show="!isNoteFocused"
-      class="mt-auto pt-2 grid grid-cols-4 gap-1.5 sm:gap-2 select-none touch-manipulation"
+      class="mt-auto pt-1 sm:pt-2 grid grid-cols-4 gap-1 sm:gap-2 select-none touch-manipulation"
     >
       <!-- Row 1 -->
       <button
         type="button"
         @pointerdown="triggerKey(() => handleDigit('1'), $event)"
         @click="triggerKey(() => handleDigit('1'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         1
       </button>
@@ -363,7 +363,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('2'), $event)"
         @click="triggerKey(() => handleDigit('2'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         2
       </button>
@@ -371,7 +371,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('3'), $event)"
         @click="triggerKey(() => handleDigit('3'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         3
       </button>
@@ -380,9 +380,9 @@ async function handleCategoryTap(categoryName: string) {
         @pointerdown="triggerKey(handleBackspace, $event)"
         @click="triggerKey(handleBackspace, $event)"
         title="Hapus Digit Terakhir"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
       >
-        <Delete :size="20" />
+        <Delete :size="18" class="sm:w-5 sm:h-5" />
       </button>
 
       <!-- Row 2 -->
@@ -390,7 +390,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('4'), $event)"
         @click="triggerKey(() => handleDigit('4'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         4
       </button>
@@ -398,7 +398,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('5'), $event)"
         @click="triggerKey(() => handleDigit('5'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         5
       </button>
@@ -406,7 +406,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('6'), $event)"
         @click="triggerKey(() => handleDigit('6'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         6
       </button>
@@ -415,9 +415,9 @@ async function handleCategoryTap(categoryName: string) {
         @pointerdown="triggerKey(handleClear, $event)"
         @click="triggerKey(handleClear, $event)"
         title="Reset Nominal"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-surface text-stone-warm font-bold text-xs border border-sand-border hover:text-stone-dark flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
       >
-        <RotateCcw :size="19" />
+        <RotateCcw :size="17" class="sm:w-[19px] sm:h-[19px]" />
       </button>
 
       <!-- Row 3 -->
@@ -425,7 +425,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('7'), $event)"
         @click="triggerKey(() => handleDigit('7'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         7
       </button>
@@ -433,7 +433,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('8'), $event)"
         @click="triggerKey(() => handleDigit('8'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         8
       </button>
@@ -441,7 +441,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('9'), $event)"
         @click="triggerKey(() => handleDigit('9'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         9
       </button>
@@ -449,11 +449,11 @@ async function handleCategoryTap(categoryName: string) {
       <button
         type="button"
         @click="handleEnter"
-        class="row-span-2 h-full min-h-[124px] sm:min-h-[140px] rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
+        class="row-span-2 h-full numpad-enter rounded-xl sm:rounded-2xl bg-matcha-100 text-matcha-deep font-extrabold border border-matcha-200 hover:bg-matcha-200/80 flex items-center justify-center shadow-xs btn-tactile select-none touch-manipulation"
         title="Catatan (Enter)"
         aria-label="Catatan"
       >
-        <CornerDownLeft :size="24" />
+        <CornerDownLeft :size="22" class="sm:w-6 sm:h-6" />
       </button>
 
       <!-- Row 4: Col 1 [ 000 ], Col 2 [ 0 ], Col 3 [ . ] -->
@@ -462,7 +462,7 @@ async function handleCategoryTap(categoryName: string) {
         @pointerdown="triggerKey(handleAddThousands, $event)"
         @click="triggerKey(handleAddThousands, $event)"
         title="Tambah Ribuan (000)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-base sm:text-lg border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-sm sm:text-lg border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         000
       </button>
@@ -470,7 +470,7 @@ async function handleCategoryTap(categoryName: string) {
         type="button"
         @pointerdown="triggerKey(() => handleDigit('0'), $event)"
         @click="triggerKey(() => handleDigit('0'), $event)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-extrabold text-xl sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-extrabold text-lg sm:text-2xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation"
       >
         0
       </button>
@@ -479,7 +479,7 @@ async function handleCategoryTap(categoryName: string) {
         @pointerdown="triggerKey(handleDot, $event)"
         @click="triggerKey(handleDot, $event)"
         title="Titik Desimal (.)"
-        class="h-[58px] sm:h-[66px] rounded-2xl bg-sand-card text-stone-dark font-black text-2xl sm:text-3xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation pb-1"
+        class="numpad-key rounded-xl sm:rounded-2xl bg-sand-card text-stone-dark font-black text-xl sm:text-3xl border border-sand-border hover:bg-sand-surface shadow-xs btn-tactile flex items-center justify-center select-none touch-manipulation pb-1"
       >
         .
       </button>
