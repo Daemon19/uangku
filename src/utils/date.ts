@@ -93,14 +93,42 @@ export function filterTransactionsByTime(transactions: Transaction[], filter: Ti
 }
 
 /**
- * Check if a date string is from today
+ * Convert ISO string to format required by <input type="datetime-local">: YYYY-MM-DDTHH:mm
  */
-export function isToday(isoString: string): boolean {
-  const target = new Date(isoString);
-  const today = new Date();
-  return (
-    target.getFullYear() === today.getFullYear() &&
-    target.getMonth() === today.getMonth() &&
-    target.getDate() === today.getDate()
-  );
+export function toDateTimeLocalInput(isoString: string): string {
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Convert YYYY-MM-DDTHH:mm from input to ISO 8601 string preserving current seconds/ms if available
+ */
+export function fromDateTimeLocalInput(localString: string, originalIso?: string): string {
+  try {
+    if (!localString) return originalIso || new Date().toISOString();
+    const date = new Date(localString);
+    if (isNaN(date.getTime())) return originalIso || new Date().toISOString();
+    
+    // If originalIso has seconds/ms, we can blend them or use clean seconds
+    if (originalIso) {
+      const orig = new Date(originalIso);
+      if (!isNaN(orig.getTime())) {
+        date.setSeconds(orig.getSeconds(), orig.getMilliseconds());
+      }
+    }
+    return date.toISOString();
+  } catch {
+    return originalIso || new Date().toISOString();
+  }
 }

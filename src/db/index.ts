@@ -74,6 +74,20 @@ export async function deleteTransaction(id: number): Promise<void> {
 }
 
 /**
+ * Update an existing transaction by id.
+ */
+export async function updateTransaction(
+  id: number,
+  changes: Partial<Omit<Transaction, 'id'>>
+): Promise<number> {
+  const cleanChanges = { ...changes };
+  if (cleanChanges.note !== undefined) {
+    cleanChanges.note = cleanChanges.note.trim() || undefined;
+  }
+  return await db.transactions.update(id, cleanChanges);
+}
+
+/**
  * Clear all transactions and memories.
  */
 export async function clearAllData(): Promise<void> {

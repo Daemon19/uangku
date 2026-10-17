@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import confetti from 'canvas-confetti';
 import type { Transaction, TimeFilter, PaymentType } from '@/db/types';
-import { db, addTransaction, deleteTransaction, seedSampleData } from '@/db';
+import { db, addTransaction, deleteTransaction, updateTransaction, seedSampleData } from '@/db';
 import { useLiveQuery } from '@/composables/useLiveQuery';
 import { useAudioFeedback } from '@/composables/useAudioFeedback';
 import { filterTransactionsByTime } from '@/utils/date';
@@ -15,6 +15,7 @@ import ControlCenter from '@/components/ControlCenter.vue';
 import BottomNavbar from '@/components/BottomNavbar.vue';
 import AnalyticsModal from '@/components/AnalyticsModal.vue';
 import ExportModal from '@/components/ExportModal.vue';
+import EditTransactionModal from '@/components/EditTransactionModal.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
 import PwaInstallPrompt from '@/components/PwaInstallPrompt.vue';
 
@@ -48,6 +49,18 @@ const displayedTransactions = computed(() => {
 // Modals
 const isAnalyticsOpen = ref(false);
 const isExportOpen = ref(false);
+const editingTransaction = ref<Transaction | null>(null);
+const isEditModalOpen = ref(false);
+
+function handleSelectTransaction(tx: Transaction) {
+  editingTransaction.value = tx;
+  isEditModalOpen.value = true;
+}
+
+function handleCloseEditModal() {
+  isEditModalOpen.value = false;
+  editingTransaction.value = null;
+}
 
 // Toast Feedback
 const toast = ref<{
@@ -140,6 +153,33 @@ async function handleDelete(id: number) {
   }
 }
 
+// Update existing transaction
+async function handleSaveTransaction(payload: {
+  id: number;
+  amount: number;
+  category: string;
+  type: PaymentType;
+  note?: string;
+  timestamp: string;
+}) {
+  try {
+    await updateTransaction(payload.id, {
+      amount: payload.amount,
+      category: payload.category,
+      type: payload.type,
+      note: payload.note,
+      timestamp: payload.timestamp,
+    });
+
+    triggerSuccess();
+    handleCloseEditModal();
+    showToast('Perubahan transaksi disimpan', 'success');
+  } catch (err) {
+    console.error('Failed to update transaction:', err);
+    showToast('Gagal menyimpan perubahan', 'warning');
+  }
+}
+
 // Initial onboarding check: if first visit ever, load sample data so app isn't blank
 onMounted(async () => {
   try {
@@ -175,8 +215,7 @@ onMounted(async () => {
       <main ref="mainScrollContainer" class="flex-1 overflow-y-auto">
         <ActivityStream
           :transactions="displayedTransactions"
-          @duplicate="handleDuplicate"
-          @delete="handleDelete"
+          @select="handleSelectTransaction"
         />
       </main>
 
@@ -196,6 +235,15 @@ onMounted(async () => {
       />
 
       <!-- Modals -->
+      <EditTransactionModal
+        :is-open="isEditModalOpen"
+        :transaction="editingTransaction"
+        @close="handleCloseEditModal"
+        @save="handleSaveTransaction"
+        @duplicate="handleDuplicate"
+        @delete="handleDelete"
+      />
+
       <AnalyticsModal
         :is-open="isAnalyticsOpen"
         :transactions="displayedTransactions"

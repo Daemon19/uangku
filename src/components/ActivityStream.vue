@@ -10,8 +10,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'duplicate', tx: Transaction): void;
-  (e: 'delete', id: number): void;
+  (e: 'select', tx: Transaction): void;
 }>();
 
 const searchQuery = ref('');
@@ -97,8 +96,7 @@ const groupedTransactions = computed(() => {
             v-for="tx in group.items"
             :key="tx.id"
             :transaction="tx"
-            @duplicate="emit('duplicate', $event)"
-            @delete="emit('delete', $event)"
+            @select="emit('select', $event)"
           />
         </div>
       </div>

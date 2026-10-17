@@ -5,15 +5,14 @@ import { formatRupiah } from '@/utils/currency';
 import { formatTime } from '@/utils/date';
 import { getCategoryByName } from '@/utils/categories';
 import CategoryIcon from './CategoryIcon.vue';
-import { Copy, Trash2, Wallet, CreditCard } from 'lucide-vue-next';
+import { Wallet, CreditCard, ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps<{
   transaction: Transaction;
 }>();
 
 const emit = defineEmits<{
-  (e: 'duplicate', tx: Transaction): void;
-  (e: 'delete', id: number): void;
+  (e: 'select', tx: Transaction): void;
 }>();
 
 const categoryInfo = computed(() => {
@@ -22,7 +21,14 @@ const categoryInfo = computed(() => {
 </script>
 
 <template>
-  <div class="bg-sand-card rounded-2xl p-3.5 border border-sand-border/80 shadow-soft hover:shadow-md transition-all group relative overflow-hidden flex items-center justify-between gap-3">
+  <div
+    role="button"
+    tabindex="0"
+    @click="emit('select', transaction)"
+    @keydown.enter="emit('select', transaction)"
+    @keydown.space.prevent="emit('select', transaction)"
+    class="bg-sand-card rounded-2xl p-3.5 border border-sand-border/80 shadow-soft hover:shadow-md hover:border-matcha-deep/30 transition-all group relative overflow-hidden flex items-center justify-between gap-3 cursor-pointer btn-tactile text-left"
+  >
     <!-- Left: Category Icon & Details -->
     <div class="flex items-center gap-3 min-w-0">
       <!-- Category Icon with gentle background -->
@@ -72,7 +78,7 @@ const categoryInfo = computed(() => {
       </div>
     </div>
 
-    <!-- Right: Amount & Quick Actions -->
+    <!-- Right: Amount & Subtle Chevron indicator -->
     <div class="flex items-center gap-2 shrink-0">
       <div class="text-right">
         <span class="text-sm font-bold text-matcha-deep font-sans">
@@ -80,26 +86,7 @@ const categoryInfo = computed(() => {
         </span>
       </div>
 
-      <!-- Quick Action Buttons: Duplicate & Delete -->
-      <div class="flex items-center gap-0.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity ml-1">
-        <button
-          type="button"
-          @click.stop="emit('duplicate', transaction)"
-          title="Catat Ulang (Duplikasi)"
-          class="p-1.5 rounded-lg text-stone-warm hover:text-matcha-deep hover:bg-sand-surface transition-colors btn-tactile"
-        >
-          <Copy :size="15" />
-        </button>
-
-        <button
-          type="button"
-          @click.stop="transaction.id && emit('delete', transaction.id)"
-          title="Hapus Transaksi"
-          class="p-1.5 rounded-lg text-stone-warm hover:text-red-600 hover:bg-red-50 transition-colors btn-tactile"
-        >
-          <Trash2 :size="15" />
-        </button>
-      </div>
+      <ChevronRight :size="16" class="text-stone-muted group-hover:text-matcha-deep group-hover:translate-x-0.5 transition-all" />
     </div>
   </div>
 </template>
