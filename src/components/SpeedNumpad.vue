@@ -241,12 +241,16 @@ async function handleCategoryTap(categoryName: string) {
         class="bg-sand-surface rounded-2xl p-3 sm:p-3.5 border border-sand-border/80 transition-all flex flex-col gap-2 shadow-xs shrink-0"
         :class="{ 'animate-shake border-red-400 bg-red-50/50': isShaking }"
       >
-        <!-- Top Row: Payment Switcher & Amount Heading -->
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-stone-warm uppercase tracking-wider select-none">Nominal</span>
-
+      <div class="flex items-baseline gap-1.5 py-0.5">
+          <!-- Main Currency & Amount Display -->
+          <span class="text-xl sm:text-2xl font-extrabold text-matcha-deep/80 select-none">Rp</span>
+          <div class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight font-sans select-none flex items-baseline">
+            <span class="text-matcha-deep">{{ displayParts.mainText }}</span>
+            <span v-if="displayParts.dimmedZeros" class="text-matcha-deep/30 font-bold">{{ displayParts.dimmedZeros }}</span>
+          </div>
+          
           <!-- Payment Switcher Toggle: Tunai vs Rekening -->
-          <div class="flex items-center bg-sand-card p-0.5 rounded-xl border border-sand-border shadow-xs">
+          <div class="flex ml-auto items-center bg-sand-card p-0.5 rounded-xl border border-sand-border shadow-xs">
             <button
               type="button"
               @pointerdown="triggerKey(() => setPayment('tunai'), $event)"
@@ -276,15 +280,6 @@ async function handleCategoryTap(categoryName: string) {
               <CreditCard :size="12" />
               <span>Rekening</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Main Currency & Amount Display -->
-        <div class="flex items-baseline gap-1.5 py-0.5">
-          <span class="text-xl sm:text-2xl font-extrabold text-matcha-deep/80 select-none">Rp</span>
-          <div class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight font-sans select-none flex items-baseline">
-            <span class="text-matcha-deep">{{ displayParts.mainText }}</span>
-            <span v-if="displayParts.dimmedZeros" class="text-matcha-deep/30 font-bold">{{ displayParts.dimmedZeros }}</span>
           </div>
         </div>
 
@@ -326,22 +321,6 @@ async function handleCategoryTap(categoryName: string) {
 
       <!-- Category Direct-Log Matrix (Sub-3-Second Trigger) -->
       <div class="shrink-0">
-        <div class="flex items-center justify-between mb-1.5 px-1 min-h-[24px]">
-          <span class="text-xs font-bold text-stone-warm uppercase tracking-wider flex items-center gap-1">
-            Kategori
-          </span>
-          <button
-            v-if="isNoteFocused"
-            type="button"
-            @click="restoreNumpad"
-            class="text-xs font-bold text-matcha-deep flex items-center gap-1 hover:underline btn-tactile px-2 py-0.5 rounded-lg bg-matcha-100/70"
-            title="Tampilkan Numpad"
-          >
-            <LayoutGrid :size="12" />
-            <span>Numpad</span>
-          </button>
-        </div>
-
         <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
           <button
             v-for="cat in CATEGORIES"
